@@ -13,13 +13,15 @@ cn.cjp.logger.web.controller.MVCConfig
 
 运行*cn.cjp.logger.service.LogServiceTest#report()*，添加测试数据
 
-- 测试1：
+运行*cn.cjp.logger.Application*启动项目：
+
+- 页面1：
 
 访问：http://local:8080/log/DEBUG
 
 这是一个简单的查看页面
 
-- 测试2：
+- 页面2：
 
 访问：http://local:8080/pages/index.html
 
