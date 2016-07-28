@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>日志集中管理系统</title>
+
+    <style type="text/css">
+        body {
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        table {
+            font-family: verdana, arial, sans-serif;
+            font-size: 11px;
+            color: #333333;
+            border-width: 1px;
+            border-color: #666666;
+            border-collapse: collapse;
+            width: 96%;
+            margin: 0 auto;
+        }
+
+        table tr:HOVER {
+            background-color: silver;
+        }
+
+        table td {
+            border-width: 1px;
+            text-align: left;
+            border-style: solid;
+            border-color: #666666;
+        }
+
+        table tr.ERROR {
+            color: red;
+        }
+
+        table tr .message {
+            color: red;
+        }
+
+        a {
+            color: black;
+        }
+
+    </style>
+    <script type="text/javascript">
+        function displayStack(id) {
+            var stackId = "#table-"+id+"-stack";
+            console.log($(stackId).css("display"));
+            if($(stackId).is(":visible")) {
+                $(stackId).css("display", "none");
+            } else {
+                $(stackId).css("display", "");
+            }
+        }
+    </script>
+
+</head>
+
+<body ng-app="app" ng-controller="appController">
+<h1>Log</h1>
+<div>
+    <table>
+        <tr>
+            <td style="width :50%;">
+                <a ng-show="prevPage!=_pageNum" href="?time={{time}}&_pageNum={{prevPage}}">上一页</a>
+                <span ng-show="prevPage==_pageNum">&nbsp;</span>
+            </td>
+            <td>
+                <a ng-show="nextPage!=_pageNum" href="?time={{time}}&_pageNum={{nextPage}}">下一页</a>
+                <span ng-show="nextPage==_pageNum">&nbsp;</span>
+            </td>
+        </tr>
+    </table>
+
+    <table ng-repeat="l in list" id="table-{{l.id}}">
+        <tr class="{{l.level}}">
+            <td style="width: 100px;" ng-click="tv = !tv">
+                <input type="checkbox" ng-model="tv" ng-show="false">
+                <a href="#table-{{l.id}}">[{{l.level}}]</a>
+            </td>
+            <td>
+                {{l.time | date:'yyyy-MM-dd HH:mm:ss'}}
+                {{l.clazz}}.{{l.method}}
+                ({{l.line}})
+                -> {{l.thread}} {{l.message}}
+            </td>
+            <td style="width: 100px;" title="{{l.server.hostName}}">{{l.server.hostAddress}}</td>
+        </tr>
+    </table>
+    <table id="table-{{l.id}}-stack" ng-show="tv">
+        <tr ng-repeat="th in l.throwables">
+            <td style="width: 100px;">&nbsp;</td>
+            <td class="message">{{th.clazz}}: {{th.message}}</td>
+        </tr>
+        <tr ng-repeat="st in th.stackTraces">
+            <td style="width: 100px;">&nbsp;</td>
+            <td>at: {{st.className}}.{{st.method}}({{st.line}})</td>
+        </tr>
+    </table>
+</div>
+
+<script src="../lib/jquery/jquery-1.11.1.js"></script>
+<script src="../lib/angular/angular.min.js"></script>
+<script>
+    var app = angular.module("app", []);
+    app.controller("appController", function($scope, $http) {
+        $http.get("/log/DEBUG.json")
+                .success(function(response){
+                    $scope.pageNum = response._pageNum;
+                    $scope.prevPage = response.prevPage;
+                    $scope.nextPage = response.nextPage;
+                    $scope.list = response.list;
+                })
+    });
+</script>
+</body>
+</html>
