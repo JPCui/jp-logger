@@ -1,4 +1,7 @@
 # introduce
+	
+	该项目使用SpringBoot搭建，所以使用起来非常简单
+	
 ```
 # 配置mongodb
 cn.cjp.logger.mongo.MongoConfig
