@@ -41,11 +41,25 @@ public class LogController {
 		return mv;
 	}
 
+	/**
+	 * 上传一条log
+	 * @param log
+	 * @return
+	 */
 	@RequestMapping("/report")
 	public String report(Log log) {
 		return logService.report(log).toString();
 	}
 
+	/**
+	 * 接口：查看log
+	 * @param response
+	 * @param time
+	 * @param level
+	 * @param _pageNum
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/{level}")
 	public ModelAndView log(HttpServletResponse response, @RequestParam(value = "time", defaultValue = "") String time,
 			@PathVariable("level") String level, @RequestParam(defaultValue = "1") int _pageNum) throws Exception {
