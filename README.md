@@ -1,6 +1,10 @@
 # introduce
 	
-	该项目使用SpringBoot搭建，所以使用起来非常简单
+	由于项目做了分布，为了便于管理系统运行日志，使用log4mongo将日志存储到mongodb上（暂时只记录系统运行日志，所以没有用kafka这些比较重的框架），后来为了日志代码部署与主系统独立，将日志的代码独立了出来。
+	
+	该项目使用SpringBoot搭建，所以使用起来非常简单。
+	
+	主系统中将日志系统上传到redis队列中（lpush），再由本系统监听队列（brpop），最后上传到mongodb上。
 	
 ## java config
 
@@ -40,83 +44,4 @@
     
     使用线程池监听(redis.brpop)日志队列
 
-# how to build an executable war
 
-	"这关系到项目独立运行与发布"，这里提供两种方案
-
-1. runnable war
-
-- add <plugin> below to ++pom.xml++
-```xml
-<plugin>
-	<groupId>org.apache.tomcat.maven</groupId>
-	<artifactId>tomcat7-maven-plugin</artifactId>
-	<version>2.1</version>
-	<executions>
-		<execution>
-		<id>tomcat-run</id>
-			<goals>
-				<goal>exec-war-only</goal>
-			</goals>
-			<phase>package</phase>
-			<configuration>
-				<path>/</path>
-				<!-- optional only if you want to use a preconfigured server.xml file -->
-				<!-- 
-				<serverXml>src/main/tomcatconf/server.xml</serverXml>
-				 -->
-				<!-- optional values which can be configurable -->
-				<attachArtifactClassifier>default value is exec-war but you can
-					customize</attachArtifactClassifier>
-				<attachArtifactClassifierType>default value is jar</attachArtifactClassifierType>
-			</configuration>
-		</execution>
-	</executions>
-</plugin>
-```
-
-- run the following command:
-```
-mvn clean package -Prunnable-war
-```
-
-2. 使用maven插件对java工程进行打包
-
-- package jar with dependencies
-
-```xml
-<plugin>
-    <artifactId>maven-assembly-plugin</artifactId>
-    <configuration>
-        <appendAssemblyId>false</appendAssemblyId>
-        <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-        </descriptorRefs>
-        <archive>
-            <manifest>
-                <mainClass>com.chenzhou.examples.Main</mainClass>
-            </manifest>
-        </archive>
-    </configuration>
-    <executions>
-        <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-                <goal>assembly</goal>
-            </goals>
-        </execution>
-    </executions>
-</plugin>
-```
-
-- run the following command:
-```
-mvn assembly:assembly -Dmaven.test.skip=true
-```
-
-# referrence
-
-- [executable war jar](http://tomcat.apache.org/maven-plugin-trunk/executable-war-jar.html)
-- [How to Build an Executable War or Jar Files](http://nextcoder.com/?p=1351)
-- [使用maven插件对java工程进行打包](http://chenzhou123520.iteye.com/blog/1706242)
