@@ -3,7 +3,7 @@ package cn.cjp.logger.web.controller;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import cn.cjp.logger.model.Log;
+import cn.cjp.logger.service.LogConsumerManager;
 import cn.cjp.logger.service.LogService;
 import cn.cjp.utils.Page;
 
@@ -23,12 +24,20 @@ public class LogController {
 	@Resource(name = "logService")
 	LogService logService;
 
-	@RequestMapping(value = "/test", produces = { MediaType.APPLICATION_XML_VALUE,
-			MediaType.APPLICATION_JSON_UTF8_VALUE })
+	@Autowired
+	LogConsumerManager logConsumerManager;
+
+	/**
+	 * 观察线程池状态
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/status")
 	@ResponseBody
-	public ModelAndView test(HttpServletResponse response) {
+	public ModelAndView status(HttpServletResponse response) {
 		ModelAndView mv = new ModelAndView("logs/index");
-		mv.addObject("test", "test");
+		mv.addObject("activeCount", logConsumerManager.activeCount);
+		mv.addObject("taskCount", logConsumerManager.taskCount);
 		return mv;
 	}
 

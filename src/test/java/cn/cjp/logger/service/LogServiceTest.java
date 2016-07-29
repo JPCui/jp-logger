@@ -21,6 +21,8 @@ import redis.clients.jedis.Jedis;
 @WebAppConfiguration // 由于是Web项目，Junit需要模拟ServletContext，因此我们需要给我们的测试类加上@WebAppConfiguration。
 public class LogServiceTest {
 
+	public static String LEVEL = "DEBUG";
+
 	@Autowired
 	LogService logService;
 
@@ -30,13 +32,13 @@ public class LogServiceTest {
 		System.out.println(JacksonUtil.toJson(obj));
 	}
 
-	private static Log buildLog() {
+	private static Log buildLog(Object msg) {
 		Log log = new Log();
 		log.setClazz(Log.class.getName());
 		log.setClient(new Host("0.0.0.0", "client"));
-		log.setLevel("DEBUG");
+		log.setLevel(LEVEL);
 		log.setLine("1");
-		log.setMessage("it is a test message");
+		log.setMessage("it is a test message(" + msg + ")");
 		log.setMethod("public void test()");
 		log.setServer(new Host("1.1.1.1", "server"));
 		log.setThread("thread-0");
@@ -48,14 +50,16 @@ public class LogServiceTest {
 
 	@Test
 	public void report() {
-		logService.report(buildLog());
+		logService.report(buildLog(1));
 	}
 
 	public static void main(String[] args) {
-		Jedis jedis = new Jedis("redis.host", 6379);
-		jedis.auth("51cuotihui");
-		jedis.lpush("list.cjp.logger", JacksonUtil.toJson(buildLog()));
-		jedis.close();
+		for (int i = 0; i < 50; i++) {
+			Jedis jedis = new Jedis("redis.host", 6379);
+			jedis.auth("51cuotihui");
+			jedis.lpush(LogConsumer.CACHE_LIST, JacksonUtil.toJson(buildLog(i)));
+			jedis.close();
+		}
 	}
 
 }
