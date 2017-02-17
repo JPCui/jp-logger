@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import cn.cjp.logger.model.BeanInspectorModel;
 import cn.cjp.logger.model.Log;
-import cn.cjp.logger.service.LogConsumerManager;
 import cn.cjp.logger.service.LogService;
-import cn.cjp.utils.Page;
+import cn.cjp.logger.service.NodeService;
+import cn.cjp.logger.util.Page;
 
 @RestController(value = "logController")
 @RequestMapping("/log")
@@ -25,24 +26,24 @@ public class LogController {
 	LogService logService;
 
 	@Autowired
-	LogConsumerManager logConsumerManager;
+	NodeService nodeService;
 
-	/**
-	 * 观察线程池状态
-	 * @param response
-	 * @return
-	 */
-	@RequestMapping(value = "/status")
+	@RequestMapping("/inspector")
 	@ResponseBody
-	public ModelAndView status(HttpServletResponse response) {
-		ModelAndView mv = new ModelAndView("logs/index");
-		mv.addObject("activeCount", logConsumerManager.activeCount);
-		mv.addObject("taskCount", logConsumerManager.taskCount);
+	public ModelAndView inspector(@RequestParam(defaultValue = BeanInspectorModel.AVGPERIOD) String sortedName,
+			@RequestParam(defaultValue = "1") int _pageNum) throws Exception {
+		_pageNum = _pageNum < 1 ? 1 : _pageNum;
+		Page model = nodeService.findAll(sortedName, _pageNum);
+
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("data", model);
+		mv.setViewName("/logs/inspector");
 		return mv;
 	}
 
 	/**
 	 * 上传一条log
+	 * 
 	 * @param log
 	 * @return
 	 */
@@ -53,6 +54,7 @@ public class LogController {
 
 	/**
 	 * 接口：查看log
+	 * 
 	 * @param response
 	 * @param time
 	 * @param level
