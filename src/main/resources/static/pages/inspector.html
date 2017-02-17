@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.css">
+    <style type="text/css">
+        .half-circle {
+            width: 30px;
+            height: 30px;
+            /* 水平半径 = width/2, 垂直半径 = height + padding */
+            border-radius: 0 0 20px 20px/0 0 20px 20px;
+            background-color: #f29900;
+            color: #fff;
+            text-align: center;
+            font-size: 1.6rem;
+        }
+
+        .C-cate {
+            margin: 10px auto;
+            width: 90%;
+            transition: all linear 0.5s;
+            background-color: lightblue;
+            position: relative;
+            top: 0;
+            left: 0;
+        }
+
+        .C-tip {
+            position: absolute;
+            right: 10px;
+            top: -5px;
+        }
+
+        .C-cate.ng-hide {
+            background-color: greenyellow;
+            top:-200px;
+            left: 200px;
+        }
+    </style>
+    <style type="text/css">
+        ul.t-table, ul.t-table li {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 0 25px;
+            -webkit-margin-before: 0;
+            -webkit-margin-after: 0;
+            -webkit-padding-start: 0;
+            width: 90%;
+        }
+        ul.t-table li{
+            margin-top: 10px;
+        }
+
+        .t-op {
+            width: 30px;
+        }
+
+        .t-1{
+            width: 80px;
+        }
+
+        .tr-deep-1 {
+            background-color: silver;
+            border-top: solid 2px black;
+        }
+        
+        .long-l {
+        	width: 700px;
+        	overflow: overlay;
+        }
+        
+        .long-m {
+        	width: 150px;
+        	overflow: overlay;
+        }
+
+        @media only screen and (min-width: 888px) {
+            .t-hide-on-narrow {
+                display: table-cell !important;
+            }
+        }
+
+        .t-hide-on-narrow {
+            display: none;
+        }
+    </style>
+    <title>Title</title>
+</head>
+<body id="demo" ng-app="demo" ng-controller="demo">
+
+<div style="text-align: center;">
+    <div class="C-tip half-circle" ng-click="changeTip()"></div>
+    <div class="C-cate" ng-hide="A_hide">
+        <a href="/log/visit">VISIT</a> | 
+        <a href="/log/info">INFO</a> | 
+        <a href="/log/warn">WARN</a> | 
+        <a href="/log/error">ERROR</a> | 
+        <a href="/pages/inspector.html">BeanInspector</a>
+    </div>
+</div>
+<h1 style="text-align: center;">bean inspector</h1>
+<header>
+	<table class="table" style="text-align: center;">
+		<tr>
+		<td style="width :50%;">
+			<a ng-if="prevPage!=pageNum" ng-click="ePrevPage()" href="#">上一页</a>
+			<a ng-if="prevPage==pageNum">&nbsp;</a>
+		</td>
+		<td>
+			<a ng-if="nextPage!=pageNum" ng-click="eNextPage()" href="#">下一页</a>
+			<a ng-if="nextPage==pageNum">&nbsp;</a>
+		</td>
+		</tr>
+		<tr ng-hide="B_hide">
+		<td colspan="2">
+			loading...
+		</td>
+		</tr>
+	</table>
+</header>
+<div>
+	<table class="table" style="margin: 0 auto;">
+		<thead>
+	    <tr class="t-tr">
+	        <td class="t-td t_op">[+]</td>
+	        <td class="t-td t-1">avg period</td>
+	        <td class="t-td t-x">function(...args)</td>
+	        <td class="t-td t-1 t-hide-on-narrow">calledTimes</td>
+	        <td class="t-td t-1 t-hide-on-narrow">period</td>
+	        <td class="t-td t-1 t-hide-on-narrow">return line num</td>
+	    </tr>
+		</thead>
+	    <tbody ng-repeat="node in nodes" ng-include="'./treeView.html'"></tbody>
+	</table>
+</div>
+
+<script src="http://apps.bdimg.com/libs/angular.js/1.4.6/angular.min.js"></script>
+<script src="http://apps.bdimg.com/libs/angular.js/1.4.6/angular-animate.min.js"></script>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script>
+
+    var app = angular.module('demo', []);
+    
+	app.controller('demo', function($scope, $http) {
+	    $scope.request = function(pageNum) {
+			$scope.B_hide = 0;
+			$scope.deep = 0;
+    		$http.get("/log/inspector.json?sortedName=calledTimes&_pageNum="+pageNum).success(
+   				function(response) {
+					$scope.pageNum = response.data.currPage;
+					$scope.currPage = response.data.currPage;
+					$scope.prevPage = response.data.prevPage;
+					$scope.nextPage = response.data.nextPage;
+					$scope.nodes = response.data.resultList;
+					$scope.B_hide = 1;
+   			});
+	    }
+        $scope.eNextPage = function() {
+        	$scope.request($scope.nextPage);
+        }
+        $scope.ePrevPage = function() {
+        	$scope.request($scope.prevPage);
+        }
+        $scope.request(1);
+	    $scope.changeTip = function () {
+	        $scope.A_hide = !$scope.A_hide;
+	    };
+	});
+	// 页面加载完成后,再加载模块
+	// angular.element(document).ready(function() {
+	// 	angular.bootstrap(document.getElementById("demo"), [ 'demo' ]);
+	// });
+</script>
+</body>
+</html>

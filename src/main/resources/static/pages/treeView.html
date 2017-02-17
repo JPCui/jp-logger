@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+
+<tr class="tr-deep-{{deep%2}}" style="border-top: solid 2px black;">
+    <td ng-hide="true" ng-init="deep = deep +1"></td>
+    <td class="t-op">{{deep}}</td>
+    <td class="">{{node.bean.avgPeriod}}</td>
+    <td class="">{{node.bean.clazz}}.{{node.bean.method}}</td>
+    <td class=" t-hide-on-narrow">{{node.bean.calledTimes}}</td>
+    <td class=" t-hide-on-narrow">{{node.bean.period}}</td>
+    <td class=" t-hide-on-narrow">{{node.bean.returnLineNum}}</td>
+</tr>
+<tr class="tr-deep-{{deep%2}} t-th" ng-repeat="node in node.childs" ng-include="'./treeView.html'">
+</tr>
