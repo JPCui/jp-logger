@@ -8,13 +8,14 @@ import java.util.List;
 
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
+import org.bson.Document;
 import org.bson.types.BasicBSONList;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import cn.cjp.utils.JacksonUtil;
+import cn.cjp.logger.util.JacksonUtil;
 
 /**
  * 日志基本信息
@@ -82,6 +83,67 @@ public class Log implements AbstractModel {
 		} catch (UnknownHostException e) {
 			log.setServer(new Host("127.0.0.1", "unknown host"));
 		}
+		return log;
+	}
+
+	public Document toDoc() {
+		Document dbo = new Document();
+		dbo.append("version", version);
+		dbo.append("time", time);
+		dbo.append("level", level);
+		dbo.append("thread", thread);
+		dbo.append("message", message);
+		dbo.append("method", method);
+		dbo.append("clazz", clazz);
+		dbo.append("line", line);
+		if (throwables != null) {
+			BasicDBList dbl = new BasicDBList();
+			for (Throwable throwable : throwables) {
+				dbl.add(throwable.toDBObject());
+			}
+			dbo.append("throwables", dbl);
+		}
+		if (this.host != null) {
+			dbo.append("host", this.host.toDBObject());
+		}
+		return dbo;
+	}
+
+	public static Log fromDoc(Document dbo) {
+		Object version = dbo.get("version");
+		if (version == null || !version.toString().equals(Log.version)) {
+			// return null;
+		}
+		Log log = new Log();
+		log.setId(dbo.get("_id").toString());
+		log.setTime((Date) dbo.get("time"));
+		log.setLevel((String) dbo.get("level"));
+		log.setThread((String) dbo.get("thread"));
+		log.setMethod((String) dbo.get("method"));
+		log.setMessage((String) dbo.get("message"));
+		log.setLine((String) dbo.get("line"));
+		// 调用类
+		log.setClazz((String) dbo.get("clazz"));
+
+		/*
+		 * 获取异常
+		 */
+		List<Throwable> throwables = log.getThrowables();
+		if (throwables == null) {
+			throwables = new ArrayList<>();
+		}
+		@SuppressWarnings("unchecked")
+		List<Document> bsonList = (List<Document>) dbo.get("throwables");
+		if (bsonList != null) {
+			Iterator<Document> throwablesIter = bsonList.iterator();
+			while (throwablesIter.hasNext()) {
+				Document dbo4Throwables = (Document) throwablesIter.next();
+				Throwable throwable = Throwable.fromDoc(dbo4Throwables);
+				throwables.add(throwable);
+			}
+			log.setThrowables(throwables);
+		}
+		log.setServer(Host.fromDoc(dbo));
 		return log;
 	}
 

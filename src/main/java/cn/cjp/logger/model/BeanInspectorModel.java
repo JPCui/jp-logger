@@ -2,6 +2,7 @@ package cn.cjp.logger.model;
 
 import java.util.Date;
 
+import org.bson.Document;
 import org.springframework.util.StringUtils;
 
 import com.mongodb.BasicDBObject;
@@ -48,6 +49,22 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 	@Override
 	public DBObject toDBObject() {
 		BasicDBObject basicDBObject = new BasicDBObject();
+		if (!StringUtils.isEmpty(getId())) {
+			basicDBObject.put(ID, getId());
+		}
+		basicDBObject.put(CLASS, clazz);
+		basicDBObject.put(METHOD, method);
+		basicDBObject.put(PERIOD, period);
+		basicDBObject.put(CALLEDTIMES, calledTimes);
+		basicDBObject.put(AVGPERIOD, avgPeriod);
+		basicDBObject.put(RETURNLINENUM, returnLineNum);
+		basicDBObject.put(TIME, time);
+		basicDBObject.put(REMARKS, remarks);
+		return basicDBObject;
+	}
+
+	public Document toDoc() {
+		Document basicDBObject = new Document();
 		if (!StringUtils.isEmpty(getId())) {
 			basicDBObject.put(ID, getId());
 		}
@@ -140,6 +157,22 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 
 	public void setAvgPeriod(long avgPeriod) {
 		this.avgPeriod = avgPeriod;
+	}
+
+	public static BeanInspectorModel fromDoc(Document dbo) {
+		BeanInspectorModel model = new BeanInspectorModel();
+		model.setCalledTimes(null == dbo.get(CALLEDTIMES) ? 1 : (Integer) dbo.get(CALLEDTIMES));
+		model.setClazz(null == dbo.get(CLASS) ? "" : (String) dbo.get(CLASS));
+		if (null != dbo.get(ID)) {
+			model.setId(dbo.get(ID).toString());
+		}
+		model.setMethod(null == dbo.get(METHOD) ? "" : (String) dbo.get(METHOD));
+		model.setPeriod(null == dbo.get(PERIOD) ? 0L : (long) dbo.get(PERIOD));
+		model.setReturnLineNum(null == dbo.get(RETURNLINENUM) ? 0 : (int) dbo.get(RETURNLINENUM));
+		model.setAvgPeriod(null == dbo.get(AVGPERIOD) ? 0L : (long) dbo.get(AVGPERIOD));
+		model.setTime(null == dbo.get(TIME) ? new Date() : (Date) dbo.get(TIME));
+		model.setRemarks(null == dbo.get(REMARKS) ? "" : (String) dbo.get(REMARKS));
+		return model;
 	}
 
 }

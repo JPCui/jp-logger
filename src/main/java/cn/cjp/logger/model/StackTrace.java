@@ -3,10 +3,12 @@ package cn.cjp.logger.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import cn.cjp.utils.JacksonUtil;
+import cn.cjp.logger.util.JacksonUtil;
 
 public class StackTrace {
 
@@ -96,6 +98,14 @@ public class StackTrace {
 
 	public void setLine(int line) {
 		this.line = line;
+	}
+
+	public static StackTrace fromDoc(Document dbo) {
+		StackTrace stackTrace = new StackTrace();
+		stackTrace.setClassName((String) dbo.get("className"));
+		stackTrace.setLine((int) dbo.get("line"));
+		stackTrace.setMethod((String) dbo.get("method"));
+		return stackTrace;
 	}
 
 }

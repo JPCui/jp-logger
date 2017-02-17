@@ -1,6 +1,6 @@
 package cn.cjp.logger.model;
 
-import cn.cjp.utils.JacksonUtil;
+import cn.cjp.logger.util.JacksonUtil;
 
 public class BaseModel {
 

@@ -3,6 +3,8 @@ package cn.cjp.logger.model;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.bson.Document;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -32,6 +34,19 @@ public class Host implements AbstractModel {
 		Host host = new Host();
 		host.setHostAddress(address.getHostAddress());
 		host.setHostName(address.getHostName());
+		return host;
+	}
+
+	public static Host fromDoc(Document dbo) {
+		if (!dbo.containsKey("host")) {
+			return null;
+		}
+		String hostAddress = ((Document) dbo.get("host")).get("hostAddress").toString();
+		String hostName = ((Document) dbo.get("host")).get("hostName").toString();
+
+		Host host = new Host();
+		host.setHostAddress(hostAddress);
+		host.setHostName(hostName);
 		return host;
 	}
 
