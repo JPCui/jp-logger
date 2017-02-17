@@ -13,7 +13,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import cn.cjp.logger.Application;
 import cn.cjp.logger.model.Host;
 import cn.cjp.logger.model.Log;
-import cn.cjp.utils.JacksonUtil;
+import cn.cjp.logger.util.JacksonUtil;
 import redis.clients.jedis.Jedis;
 
 @RunWith(SpringJUnit4ClassRunner.class) // SpringJUnit支持，由此引入Spring-Test框架支持！
@@ -56,8 +56,8 @@ public class LogServiceTest {
 	public static void main(String[] args) {
 		for (int i = 0; i < 50; i++) {
 			Jedis jedis = new Jedis("redis.host", 6379);
-			jedis.auth("51cuotihui");
-			jedis.lpush(LogConsumer.CACHE_LIST, JacksonUtil.toJson(buildLog(i)));
+			// jedis.auth("");
+			jedis.lpush("list.cjp.log", JacksonUtil.toJson(buildLog(i)));
 			jedis.close();
 		}
 	}
