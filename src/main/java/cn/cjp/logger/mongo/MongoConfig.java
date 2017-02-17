@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import cn.cjp.logger.dao.mongo.MongoDao;
-
 @Configuration
 @PropertySource(value = "classpath:/mongo.properties")
 public class MongoConfig {
@@ -46,11 +44,19 @@ public class MongoConfig {
 	@Value("${mongo.minConnectionsPerHost}")
 	int minConnectionsPerHost;
 
-	@Bean(destroyMethod = "close")
+	private static MongoDao singleton;
+
+	@Bean(destroyMethod = "close",initMethod="afterPropertiesSet")
 	public MongoDao mongoDao() throws IOException {
-		MongoDao dao = new MongoDao(host, port, username, password, database, connectTimeout,
-				heartbeatConnectRetryFrequency, heartbeatConnectTimeout, heartbeatSocketTimeout);
-		return dao;
+		if (singleton == null) {
+			synchronized (MongoConfig.class) {
+				if (singleton == null) {
+					singleton = new MongoDao(host, port, username, password, database, connectTimeout,
+							heartbeatConnectRetryFrequency, heartbeatConnectTimeout, heartbeatSocketTimeout);
+				}
+			}
+		}
+		return singleton;
 	}
 
 }
