@@ -3,38 +3,75 @@ package cn.cjp.logger.service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.QueryOperators;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 
-import cn.cjp.logger.dao.mongo.MongoDao;
 import cn.cjp.logger.model.Log;
-import cn.cjp.utils.Page;
+import cn.cjp.logger.mongo.MongoDao;
+import cn.cjp.logger.util.Page;
 
+/**
+ * 日志
+ * 
+ * @author Jinpeng Cui
+ *
+ */
 @Component("logService")
+@Configuration
+@PropertySource(value = "classpath:/config.properties")
 public class LogService {
 
 	private final static Logger logger = Logger.getLogger(LogService.class);
 
 	private final int default_page_size = 50;
 
-	public static final String COLLECTION = "cjp.logger.{level}";
+	@Value("${config.collection.prefix}")
+	String collectionPrefix;
 
-	public static String collection(String level) {
-		return COLLECTION.replace("{level}", level);
+	public String collection(String level) {
+		return collectionPrefix + level;
 	}
 
 	@Autowired
 	MongoDao mongoDao;
+
+	public Object report(HttpServletRequest request) throws Exception {
+		Map<String, Object> logMap = new HashMap<String, Object>();
+		Enumeration<String> paramNames = request.getParameterNames();
+		while (paramNames.hasMoreElements()) {
+			String paramName = paramNames.nextElement();
+			logMap.put(paramName, request.getParameter(paramName));
+		}
+		if (!logMap.containsKey("level") || !logMap.containsKey("time")) {
+			throw new Exception("level/time field not exist.");
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug(logMap);
+		}
+
+		Document doc = new Document(logMap);
+		mongoDao.getDB().getCollection(collection(logMap.get("level").toString())).insertOne(doc);
+		return doc.get("_id");
+	}
 
 	/**
 	 * 
@@ -45,7 +82,9 @@ public class LogService {
 		if (logger.isDebugEnabled()) {
 			logger.debug(log);
 		}
-		return mongoDao.getDB().getCollection(collection(log.getLevel())).insert(log.toDBObject()).getUpsertedId();
+		Document doc = log.toDoc();
+		mongoDao.getDB().getCollection(collection(log.getLevel())).insertOne(doc);
+		return doc.get("_id");
 	}
 
 	public Page findAllByTime(String level, String timeString, int pageNum) throws Exception {
@@ -55,38 +94,81 @@ public class LogService {
 		filter.put("time", new BasicDBObject(QueryOperators.LTE, date));
 
 		List<Object> logs = new ArrayList<>();
-		DB db = mongoDao.getDB(mongoDao.getDatabase());
+		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
 
-		DBCollection dbc = db.getCollection(collection(level));
-		DBCursor cursor = dbc.find(filter).skip((pageNum - 1) * default_page_size).sort(new BasicDBObject("time", -1))
-				.limit(default_page_size);
+		MongoCollection<Document> dbc = db.getCollection(collection(level));
+		FindIterable<Document> it = dbc.find(filter).skip((pageNum - 1) * default_page_size)
+				.sort(new BasicDBObject("time", -1)).limit(default_page_size);
+		MongoCursor<Document> cursor = it.iterator();
 
 		while (cursor.hasNext()) {
-			DBObject dbo = cursor.next();
-			Log log = Log.fromDBObject(dbo);
+			Document dbo = cursor.next();
+			Log log = Log.fromDoc(dbo);
 			logs.add(log);
 		}
 
-		Page page = new Page(pageNum, default_page_size, cursor.count(), logs);
+		Page page = new Page(pageNum, default_page_size, dbc.count(), logs);
 		return page;
 	}
 
 	public Page findAll(String level, int pageNum) {
 
 		List<Object> logs = new ArrayList<>();
-		DB db = mongoDao.getDB(mongoDao.getDatabase());
+		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
 
-		DBCollection dbc = db.getCollection(collection(level));
-		DBCursor cursor = dbc.find().skip((pageNum - 1) * default_page_size).sort(new BasicDBObject("time", -1))
-				.limit(default_page_size);
+		MongoCollection<Document> dbc = db.getCollection(collection(level));
+		FindIterable<Document> it = dbc.find().skip((pageNum - 1) * default_page_size)
+				.sort(new BasicDBObject("time", -1)).limit(default_page_size);
+		MongoCursor<Document> cursor = it.iterator();
 
 		while (cursor.hasNext()) {
-			DBObject dbo = cursor.next();
-			Log log = Log.fromDBObject(dbo);
+			Document dbo = cursor.next();
+			Log log = Log.fromDoc(dbo);
 			logs.add(log);
 		}
 
-		Page page = new Page(pageNum, default_page_size, (long) cursor.count(), logs);
+		Page page = new Page(pageNum, default_page_size, (long) dbc.count(), logs);
+		return page;
+	}
+
+	public Page findAllToMap(String level, int pageNum) {
+
+		List<Object> logs = new ArrayList<>();
+		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+
+		MongoCollection<Document> dbc = db.getCollection(collection(level));
+		FindIterable<Document> it = dbc.find().skip((pageNum - 1) * default_page_size)
+				.sort(new BasicDBObject("time", -1)).limit(default_page_size);
+		MongoCursor<Document> cursor = it.iterator();
+
+		while (cursor.hasNext()) {
+			Document dbo = cursor.next();
+			logs.add(dbo);
+		}
+
+		Page page = new Page(pageNum, default_page_size, (long) dbc.count(), logs);
+		return page;
+	}
+
+	public Page findAllByTimeToMap(String level, String timeString, int pageNum) throws Exception {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date date = sdf.parse(timeString);
+		BasicDBObject filter = new BasicDBObject();
+		filter.put("time", new BasicDBObject(QueryOperators.LTE, date));
+
+		List<Object> logs = new ArrayList<>();
+		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+
+		MongoCollection<Document> dbc = db.getCollection(collection(level));
+		MongoCursor<Document> cursor = dbc.find(filter).skip((pageNum - 1) * default_page_size)
+				.sort(new BasicDBObject("time", -1)).limit(default_page_size).iterator();
+
+		while (cursor.hasNext()) {
+			Document dbo = cursor.next();
+			logs.add(dbo);
+		}
+
+		Page page = new Page(pageNum, default_page_size, dbc.count(), logs);
 		return page;
 	}
 

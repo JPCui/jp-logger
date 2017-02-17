@@ -18,24 +18,18 @@ import org.springframework.stereotype.Component;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-import cn.cjp.logger.model.Log;
+import cn.cjp.logger.model.Node;
 import cn.cjp.logger.mongo.MongoDao;
 import cn.cjp.logger.redis.RedisDao;
 import cn.cjp.logger.util.JacksonUtil;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-@Component
 @Configuration
 @PropertySource(value = "classpath:/config.properties")
-public class LogConsumer implements Runnable, InitializingBean {
+@Component
+public class NodeConsumer implements Runnable, InitializingBean {
 
-	private static final Logger logger = Logger.getLogger(LogConsumer.class);
-
-	/**
-	 * 日志队列
-	 */
-	@Value("${config.queue.log}")
-	String queueName;
+	private static final Logger logger = Logger.getLogger(NodeConsumer.class);
 
 	/**
 	 * 异步任务执行器
@@ -43,17 +37,23 @@ public class LogConsumer implements Runnable, InitializingBean {
 	@Autowired
 	SimpleAsyncTaskExecutor asyncTaskExecutor;
 
-	@Value("${config.collection.prefix}")
-	String collectionPrefix;
+	/**
+	 * 日志队列
+	 */
+	@Value("${config.queue.node}")
+	String queueName;
 
 	@Resource(name = "enableRedis")
 	RedisDao redisDao;
 
 	@Autowired
 	MongoDao mongoDao;
+	
+	@Value("${config.collection.node}")
+	String collectionName;
 
 	public void run() {
-		logger.info("log consumer ready");
+		logger.info("node consumer ready");
 		while (true) {
 			try {
 				// 阻塞队列操作
@@ -63,12 +63,12 @@ public class LogConsumer implements Runnable, InitializingBean {
 				}
 				if (rec.size() == 2) {
 					String value = rec.get(1);
-					Log log = JacksonUtil.fromJsonToObj(value, Log.class);
-					Document dbo = log.toDoc();
+					Node node = JacksonUtil.fromJsonToObj(value, Node.class);
+					Document dbo = node.toDoc();
 					MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
-					MongoCollection<Document> dbc = db.getCollection(collectionPrefix + log.getLevel());
+					MongoCollection<Document> dbc = db.getCollection(collectionName);
 					dbc.insertOne(dbo);
-					String _id = dbo.get("_id").toString();
+					String _id = dbo.getString("_id");
 					if (logger.isInfoEnabled()) {
 						logger.error("insert new log " + _id);
 					}
