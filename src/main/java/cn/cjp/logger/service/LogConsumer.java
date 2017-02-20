@@ -58,9 +58,6 @@ public class LogConsumer implements Runnable, InitializingBean {
 			try {
 				// 阻塞队列操作
 				List<String> rec = redisDao.brpop(0, queueName);
-				if (logger.isDebugEnabled()) {
-					System.out.println(rec);
-				}
 				if (rec.size() == 2) {
 					String value = rec.get(1);
 					Log log = JacksonUtil.fromJsonToObj(value, Log.class);
@@ -69,7 +66,7 @@ public class LogConsumer implements Runnable, InitializingBean {
 					MongoCollection<Document> dbc = db.getCollection(collectionPrefix + log.getName().toLowerCase());
 					dbc.insertOne(dbo);
 					String _id = dbo.get("_id").toString();
-					if (logger.isInfoEnabled()) {
+					if (logger.isDebugEnabled()) {
 						logger.info("insert new log " + _id);
 					}
 				} else {
