@@ -10,7 +10,14 @@
 	
 	主系统中将日志系统上传到redis队列中（lpush），再由本系统监听队列（brpop），最后上传到mongodb上。
 	
-## java config
+# frameworks
+
+- java7/8, spring boot, maven
+- angularjs
+- redis
+- mongodb
+	
+# java config
 
 ```
  # 配置mongodb
@@ -24,7 +31,7 @@
  cn.cjp.logger.web.controller.MVCConfig
 ```
 
-## 运行一下
+# 运行一下
 
 - 运行*cn.cjp.logger.service.LogServiceTest#report()*，添加测试数据
 

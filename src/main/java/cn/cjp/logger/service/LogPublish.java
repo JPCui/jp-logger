@@ -35,6 +35,7 @@ public class LogPublish {
 
 	public void publish(Log log) {
 		redisDao.lpush(queue, log.toString());
+		redisDao.ltrim(queue, 0, 20000);
 	}
 
 }

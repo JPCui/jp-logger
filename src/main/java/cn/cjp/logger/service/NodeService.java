@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.Document;
 import org.springframework.beans.factory.InitializingBean;
@@ -14,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -35,7 +33,7 @@ public class NodeService implements InitializingBean {
 	private final static Logger logger = Logger.getLogger(NodeService.class);
 
 	private final int default_page_num = 20;
-	
+
 	@Value("${config.collection.node}")
 	String collectionName;
 
@@ -49,7 +47,7 @@ public class NodeService implements InitializingBean {
 		}
 		MongoCollection<Document> dbc = mongoDao.getDB().getCollection(collectionName);
 
-		BsonDocument query = new BsonDocument();
+		Document query = new Document();
 		query.put(Node.CLASS, new BsonString(node.getBean().getClazz()));
 		query.put(Node.METHOD, new BsonString(node.getBean().getMethod()));
 
@@ -59,20 +57,20 @@ public class NodeService implements InitializingBean {
 			dbo = node.toDoc();
 			dbc.insertOne(dbo);
 		} else {
-			BasicDBObject sort = new BasicDBObject();
+			Document sort = new Document();
 			sort.put(Node.ID, 1);
 
 			Node nodeInDB = Node.fromDoc(dbo);
 			long avgPeriod = (nodeInDB.getBean().getPeriod() + node.getBean().getPeriod())
 					/ (nodeInDB.getBean().getCalledTimes() + 1);
 
-			BasicDBObject update = new BasicDBObject();
-			BasicDBObject updateInc = new BasicDBObject();
-			BasicDBObject updateSet = new BasicDBObject();
+			Document update = new Document();
+			Document updateInc = new Document();
+			Document updateSet = new Document();
+			update.put("$inc", updateInc);
 			updateInc.put(Node.PERIOD, node.getBean().getPeriod());
 			updateInc.put(Node.CALLEDTIMES, 1);
 			updateInc.put(Node.RETURNLINENUM, node.getBean().getReturnLineNum());
-			update = new BasicDBObject("$inc", updateInc);
 
 			updateSet.put(Node.AVGPERIOD, avgPeriod);
 			// 比较平均耗时，如果大于之前的数据，则覆盖函数参数
@@ -95,8 +93,8 @@ public class NodeService implements InitializingBean {
 		MongoDatabase db = mongoDao.getDB();
 
 		MongoCollection<Document> dbc = db.getCollection(collectionName);
-		FindIterable<Document> it = dbc.find().skip((pageNum - 1) * default_page_num)
-				.sort(new BasicDBObject(sortedName, -1)).limit(default_page_num);
+		FindIterable<Document> it = dbc.find().sort(new Document(sortedName, -1)).skip((pageNum - 1) * default_page_num)
+				.limit(default_page_num);
 		MongoCursor<Document> cursor = it.iterator();
 
 		while (cursor.hasNext()) {

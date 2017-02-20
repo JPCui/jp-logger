@@ -164,7 +164,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>cn.cjp.utils.JacksonUtil</mainClass>
+							<mainClass>cn.cjp.logger.util.JacksonUtil</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

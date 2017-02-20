@@ -102,7 +102,7 @@
 <header>
 	<table class="table" style="text-align: center;">
 		<tr>
-		<td style="width :50%;">
+		<td>
 			<a ng-if="prevPage!=pageNum" ng-click="ePrevPage()" href="#">上一页</a>
 			<a ng-if="prevPage==pageNum">&nbsp;</a>
 		</td>
@@ -110,6 +110,8 @@
 			<a ng-if="nextPage!=pageNum" ng-click="eNextPage()" href="#">下一页</a>
 			<a ng-if="nextPage==pageNum">&nbsp;</a>
 		</td>
+		<td>排序 : <input ng-model="sortedName"/></td>
+		<td>页码 : <input ng-model="pageNum"/></td>
 		</tr>
 		<tr ng-hide="B_hide">
 		<td colspan="2">
@@ -143,10 +145,13 @@
     var app = angular.module('demo', []);
     
 	app.controller('demo', function($scope, $http) {
+		$scope.B_hide = 0;
+		$scope.deep = 0;
+		$scope.sortedName = "bean.avgPeriod";
+		$scope.pageNum = 1;
 	    $scope.request = function(pageNum) {
-			$scope.B_hide = 0;
-			$scope.deep = 0;
-    		$http.get("/log/inspector.json?sortedName=calledTimes&_pageNum="+pageNum).success(
+			
+    		$http.get("/log/inspector.json?sortedName=" + $scope.sortedName + "&_pageNum="+pageNum).success(
    				function(response) {
 					$scope.pageNum = response.data.currPage;
 					$scope.currPage = response.data.currPage;
@@ -162,7 +167,7 @@
         $scope.ePrevPage = function() {
         	$scope.request($scope.prevPage);
         }
-        $scope.request(1);
+        $scope.request($scope.pageNum);
 	    $scope.changeTip = function () {
 	        $scope.A_hide = !$scope.A_hide;
 	    };

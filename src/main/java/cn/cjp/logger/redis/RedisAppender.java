@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
-import org.springframework.util.StringUtils;
 
 import cn.cjp.logger.model.Log;
 import cn.cjp.logger.service.LogPublish;
@@ -19,11 +18,6 @@ public class RedisAppender extends AppenderSkeleton {
 	private static RedisDao redisDao;
 
 	private static LogPublish logPubSub;
-
-	/**
-	 * LEVEL別名，用于区别不同日志类型
-	 */
-	private String alias;
 
 	public RedisAppender() throws IOException {
 	}
@@ -56,21 +50,11 @@ public class RedisAppender extends AppenderSkeleton {
 	protected void append(LoggingEvent event) {
 		try {
 			Log log = Log.parse(event);
-			if (!StringUtils.isEmpty(alias)) {
-				log.setLevel(alias);
-			}
+			log.setName(this.getName());
 			logPubSub.publish(log);
 		} catch (Exception e) {
 			System.err.println(e);
 		}
-	}
-
-	public String getAlias() {
-		return alias;
-	}
-
-	public void setAlias(String alias) {
-		this.alias = alias;
 	}
 
 }

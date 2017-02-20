@@ -31,6 +31,8 @@ public class Log implements AbstractModel {
 
 	private Date time = new Date();
 
+	private String name = "info";
+
 	private String level = "level";
 
 	private String thread = Thread.currentThread().getName();
@@ -90,6 +92,7 @@ public class Log implements AbstractModel {
 		Document dbo = new Document();
 		dbo.append("version", version);
 		dbo.append("time", time);
+		dbo.append("name", name);
 		dbo.append("level", level);
 		dbo.append("thread", thread);
 		dbo.append("message", message);
@@ -117,6 +120,7 @@ public class Log implements AbstractModel {
 		Log log = new Log();
 		log.setId(dbo.get("_id").toString());
 		log.setTime((Date) dbo.get("time"));
+		log.setName(dbo.getString("Name"));
 		log.setLevel((String) dbo.get("level"));
 		log.setThread((String) dbo.get("thread"));
 		log.setMethod((String) dbo.get("method"));
@@ -156,6 +160,7 @@ public class Log implements AbstractModel {
 		log.setId(dbo.get("_id").toString());
 		log.setTime((Date) dbo.get("time"));
 		log.setLevel((String) dbo.get("level"));
+		log.setName((String) dbo.get("level"));
 		log.setThread((String) dbo.get("thread"));
 		log.setMethod((String) dbo.get("method"));
 		log.setMessage((String) dbo.get("message"));
@@ -195,6 +200,7 @@ public class Log implements AbstractModel {
 		}
 		dbo.append("version", version);
 		dbo.append("time", time);
+		dbo.append("name", name);
 		dbo.append("level", level);
 		dbo.append("thread", thread);
 		dbo.append("message", message);
@@ -312,6 +318,14 @@ public class Log implements AbstractModel {
 
 	public void setClient(Host client) {
 		this.client = client;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

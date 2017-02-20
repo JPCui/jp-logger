@@ -57,6 +57,15 @@ public class SentinelJedis implements RedisDao {
 		return jedis;
 	}
 
+	public String ltrim(String key, long start, long end) {
+		return execute(new JedisCallback<String>() {
+			@Override
+			public String doInJedis(Jedis jedis) {
+				return jedis.ltrim(key, start, end);
+			}
+		});
+	}
+
 	/**
 	 * @see #getResource()
 	 * @param jedis

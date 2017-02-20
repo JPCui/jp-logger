@@ -20,6 +20,8 @@ import redis.clients.jedis.Tuple;
  */
 public interface RedisDao extends Closeable {
 
+	String ltrim(String key, long start, long end);
+
 	public Long publish(String channel, String message);
 
 	public void subscribe(JedisPubSub jedisPubSub, String... channels);

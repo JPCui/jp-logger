@@ -33,9 +33,12 @@
 ```
 
 - run the following command:
-```
-mvn clean package -Prunnable-war
-```
+
+> mvn clean package -Prunnable-war -Dskip.test=true
+
+- run it
+
+> java -jar jp-logger-1.1.0.Release-war-exec.jar
 
 2. 使用maven插件对java工程进行打包
 
@@ -69,7 +72,7 @@ mvn clean package -Prunnable-war
 
 - run the following command:
 ```
-mvn assembly:assembly -Dmaven.test.skip=true
+mvn clean assembly:assembly -Dmaven.test.skip=true
 ```
 
 # referrence

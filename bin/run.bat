@@ -1,0 +1,1 @@
+java -jar ../target/jp-logger-1.1.0.Release-war-exec.jar
