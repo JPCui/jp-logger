@@ -10,11 +10,15 @@ import org.apache.log4j.Logger;
  */
 public class LoggerTest {
 
-	private static final Logger logger = Logger.getLogger(LoggerTest.class);
+	static Logger VISIT = Logger.getLogger("visit");
 
-	public static void main(String[] args) {
-		logger.info("hello info.");
-		logger.warn("hello warn.");
+	static Logger logger = Logger.getLogger(LoggerTest.class);
+
+	public static void main(String[] args) throws Throwable {
+		VISIT.info("visit info");
+		logger.info("info");
+		logger.warn("warn");
+		logger.error("error");
 	}
 
 }
