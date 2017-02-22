@@ -63,11 +63,13 @@ public class LogConsumer implements Runnable, InitializingBean {
 					Log log = JacksonUtil.fromJsonToObj(value, Log.class);
 					Document dbo = log.toDoc();
 					MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
-					MongoCollection<Document> dbc = db.getCollection(collectionPrefix + log.getName().toLowerCase());
+					final String collectionName = collectionPrefix + log.getName().toLowerCase();
+					MongoCollection<Document> dbc = db.getCollection(collectionName);
 					dbc.insertOne(dbo);
 					String _id = dbo.get("_id").toString();
 					if (logger.isDebugEnabled()) {
-						logger.info("insert new log " + _id);
+						logger.info(
+								String.format("[%s]insert new log %s, msg: %s", collectionName, _id, log.getMessage()));
 					}
 				} else {
 					logger.error("cache read list error, the err value is " + rec);
