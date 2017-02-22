@@ -9,7 +9,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 /**
- * 实体检测实体
+ * 函数调用模型
  * 
  * @author Jinpeng Cui
  *
@@ -31,16 +31,40 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 
 	private String method;
 
+	/**
+	 * 总运行时长
+	 */
 	private long period = 0;
 
+	/**
+	 * 平均运行时长
+	 */
 	private long avgPeriod;
 
-	private long calledTimes = 1L;
+	/**
+	 * 最大运行时长
+	 */
+	private long maxPeriod;
+
+	/**
+	 * 总调用次数
+	 */
+	private int calledTimes = 0;
 
 	/**
 	 * 返回行数，默认为1
 	 */
 	private int returnLineNum = 1;
+
+	/**
+	 * 平均返回行数，默认为1
+	 */
+	private int avgReturnLineNum = 1;
+
+	/**
+	 * 最大返回行数，默认为1
+	 */
+	private int maxReturnLineNum = 1;
 
 	private Date time = new Date();
 
@@ -61,6 +85,67 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 		basicDBObject.put(TIME, time);
 		basicDBObject.put(REMARKS, remarks);
 		return basicDBObject;
+	}
+
+	/**
+	 * 合并<br>
+	 * 
+	 * @param branch
+	 */
+	public void merge(BeanInspectorModel branch) {
+		BeanInspectorModel root = this;
+		long period = root.getPeriod();
+		long maxPeriod = root.getMaxPeriod();
+
+		int maxReturnLineNum = root.getMaxReturnLineNum();
+		int returnLineNum = root.getReturnLineNum();
+
+		int calledTimes = root.getCalledTimes();
+		root.setCalledTimes(calledTimes + branch.getCalledTimes());
+
+		if (branch.getPeriod() > maxPeriod) {
+			root.setMaxPeriod(branch.getPeriod());
+		}
+		root.setPeriod(period + branch.getPeriod());
+		root.setAvgPeriod(root.getPeriod() / root.getCalledTimes());
+
+		if (branch.getReturnLineNum() > maxReturnLineNum) {
+			root.setMaxReturnLineNum(branch.getReturnLineNum());
+		}
+		root.setReturnLineNum(returnLineNum + branch.getReturnLineNum());
+		root.setAvgReturnLineNum(root.getReturnLineNum() / root.getCalledTimes());
+	}
+
+	/**
+	 * 合并
+	 * 
+	 * @param branchPeriod
+	 *            分支的运行时间
+	 * @param branchReturnLineNum
+	 *            分支的返回行数
+	 */
+	public void mergeValue(long branchPeriod, int branchReturnLineNum) {
+		BeanInspectorModel root = this;
+		long period = root.getPeriod();
+		long maxPeriod = root.getMaxPeriod();
+
+		int maxReturnLineNum = root.getMaxReturnLineNum();
+		int returnLineNum = root.getReturnLineNum();
+
+		int calledTimes = root.getCalledTimes();
+		root.setCalledTimes(calledTimes + 1);
+
+		if (branchPeriod > maxPeriod) {
+			root.setMaxPeriod(branchPeriod);
+		}
+		root.setPeriod(period + branchPeriod);
+		root.setAvgPeriod(root.getPeriod() / root.getCalledTimes());
+
+		if (branchReturnLineNum > maxReturnLineNum) {
+			root.setMaxReturnLineNum(branchReturnLineNum);
+		}
+		root.setReturnLineNum(returnLineNum + branchReturnLineNum);
+		root.setAvgReturnLineNum(root.getReturnLineNum() / root.getCalledTimes());
 	}
 
 	public Document toDoc() {
@@ -95,11 +180,11 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 		this.period = period;
 	}
 
-	public long getCalledTimes() {
+	public int getCalledTimes() {
 		return calledTimes;
 	}
 
-	public void setCalledTimes(long calledTimes) {
+	public void setCalledTimes(int calledTimes) {
 		this.calledTimes = calledTimes;
 	}
 
@@ -129,7 +214,7 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 
 	public static BeanInspectorModel fromDBObject(DBObject dbo) {
 		BeanInspectorModel model = new BeanInspectorModel();
-		model.setCalledTimes(null == dbo.get(CALLEDTIMES) ? 0L : (long) dbo.get(CALLEDTIMES));
+		model.setCalledTimes(null == dbo.get(CALLEDTIMES) ? 0 : (int) dbo.get(CALLEDTIMES));
 		model.setClazz(null == dbo.get(CLASS) ? "" : (String) dbo.get(CLASS));
 		if (null != dbo.get(ID)) {
 			model.setId(dbo.get(ID).toString());
@@ -173,6 +258,30 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 		model.setTime(null == dbo.get(TIME) ? new Date() : (Date) dbo.get(TIME));
 		model.setRemarks(null == dbo.get(REMARKS) ? "" : (String) dbo.get(REMARKS));
 		return model;
+	}
+
+	public long getMaxPeriod() {
+		return maxPeriod;
+	}
+
+	public void setMaxPeriod(long maxPeriod) {
+		this.maxPeriod = maxPeriod;
+	}
+
+	public int getAvgReturnLineNum() {
+		return avgReturnLineNum;
+	}
+
+	public void setAvgReturnLineNum(int avgReturnLineNum) {
+		this.avgReturnLineNum = avgReturnLineNum;
+	}
+
+	public int getMaxReturnLineNum() {
+		return maxReturnLineNum;
+	}
+
+	public void setMaxReturnLineNum(int maxReturnLineNum) {
+		this.maxReturnLineNum = maxReturnLineNum;
 	}
 
 }

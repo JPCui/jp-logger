@@ -33,6 +33,9 @@ public class NodeService implements InitializingBean {
 	private final static Logger logger = Logger.getLogger(NodeService.class);
 
 	private final int default_page_num = 20;
+	
+	@Autowired
+	NodeProducer producer;
 
 	@Value("${config.collection.node}")
 	String collectionName;

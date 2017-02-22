@@ -29,5 +29,5 @@ public class NodeProducer {
 		redisDao.lpush(queueName, JacksonUtil.toJson(node));
 		redisDao.ltrim(queueName, 0, 20000);
 	}
-
+	
 }

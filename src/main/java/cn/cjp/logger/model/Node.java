@@ -5,7 +5,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.springframework.util.StringUtils;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -47,6 +49,9 @@ public class Node extends BaseModel implements AbstractModel {
 
 	private BeanInspectorModel bean;
 
+	public Node() {
+	}
+
 	public Node(Node parent) {
 		this.parent = parent;
 		if (parent == null) {
@@ -54,6 +59,44 @@ public class Node extends BaseModel implements AbstractModel {
 		} else {
 			this.setSource(parent.getSource());
 		}
+	}
+
+	public String toTreeString() {
+		return this.toTreeString(true, 1);
+	}
+
+	private String toTreeString(boolean isRoot, int deep) {
+		StringBuilder s = new StringBuilder();
+		if (isRoot) {
+			s.append(this.getBean().getClazz());
+		}
+		List<Node> childs = this.getChilds();
+		int length = childs.size();
+		if (length > 0) {
+			// 横向
+			s.append("\t" + childs.get(0).getBean().getClazz());
+			deep++;
+			s.append(childs.get(0).toTreeString(false, deep));
+			deep--;
+			for (int i = 1; i < length; i++) {
+				s.append("\r\n");
+				s.append(repeat("|\t", deep));
+				Node child = childs.get(i);
+				s.append("-\t" + child.getBean().getClazz());
+				deep++;
+				s.append(child.toTreeString(false, deep));
+				deep--;
+			}
+		}
+		return s.toString();
+	}
+
+	private static String repeat(String s, int times) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < times; i++) {
+			sb.append(s);
+		}
+		return sb.toString();
 	}
 
 	public void setBean(BeanInspectorModel bean) {
@@ -72,10 +115,39 @@ public class Node extends BaseModel implements AbstractModel {
 		return this.parent;
 	}
 
-	public Node addChild(Node child) {
+	/**
+	 * <pre>
+	 * a -> b -> b -> b -> c
+	 * +
+	 * a -> b -> b -> c
+	 * =
+	 * a -> b -> b -> b -> c
+	 *           | -> c
+	 * </pre>
+	 * 
+	 * @param node
+	 * @return the branch merged
+	 */
+	public Node addChild(Node branch) {
+		Node mergedBranch = null;
 		// 递归寻找相同节点，若找到，则调用次数+1，时间累加，若没找到，则视为新节点
-		childs.add(child);
-		return child;
+		boolean found = false;
+		for (Node rootChild : childs) {
+			if (rootChild.getBean().getClazz().equals(branch.getBean().getClazz())) {
+				found = true;
+				rootChild.getBean().merge(branch.getBean());
+				for (Node branchChild : branch.getChilds()) {
+					mergedBranch = rootChild.addChild(branchChild);
+				}
+			}
+		}
+		if (!found) {
+			childs.add(branch);
+			branch.parent = this;
+			mergedBranch = branch;
+//			this.getBean().merge(branch.bean);
+		}
+		return mergedBranch;
 	}
 
 	/**
@@ -129,6 +201,9 @@ public class Node extends BaseModel implements AbstractModel {
 
 	public static Node fromDoc(Document dbo) {
 		Node node = new Node(null);
+		if (dbo.get(ID) != null) {
+			node.setId(dbo.getObjectId(ID).toString());
+		}
 		Document beanDbo = (Document) dbo.get("bean");
 		BeanInspectorModel beanModel = BeanInspectorModel.fromDoc(beanDbo);
 		node.setBean(beanModel);
@@ -165,7 +240,9 @@ public class Node extends BaseModel implements AbstractModel {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("{\"bean\":");
+		sb.append("{\"_id\":");
+		sb.append(String.format("{\"%s\"", this.getId()));
+		sb.append(",\"bean\":");
 		sb.append(bean);
 		sb.append(",\"childs\":[");
 		for (int i = 0; i < this.childs.size(); i++) {
@@ -218,6 +295,9 @@ public class Node extends BaseModel implements AbstractModel {
 	}
 
 	private void addChilds(Node node, Document dbo) {
+		if (!StringUtils.isEmpty(node.getId())) {
+			dbo.put(ID, new ObjectId(node.getId()));
+		}
 		dbo.append("bean", node.getBean().toDoc());
 		List<Document> childDbos = new ArrayList<>();
 		for (Node childNode : node.getChilds()) {

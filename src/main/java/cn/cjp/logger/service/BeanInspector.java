@@ -17,14 +17,13 @@ import cn.cjp.logger.util.JacksonUtil;
  * 实体调用检测拦截器.
  * 
  * @usage <code>
-   <bean id="beanInspectAdvice" class="com.fly.common.aop.BeanInspector"></bean>
+   <bean id="beanInspectAdvice" class="xxx.BeanInspector"></bean>
 	
 	<bean id="inspector-stat-pointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut"
 		scope="prototype">
 		<property name="patterns">
 			<list>
-				<value>com.fly.((?!common)(?!base).)+.service.*</value>
-				<value>com.fly.((?!common)(?!base).)+.dao.*</value>
+				<value>xxx.((?!common)(?!base).)+.service.*</value>
 			</list>
 		</property>
 	</bean>
@@ -46,7 +45,7 @@ public class BeanInspector implements MethodInterceptor {
 	static boolean enable = true;
 
 	@Autowired
-	NodeService nodeService;
+	NodeProducer producer;
 
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -68,7 +67,7 @@ public class BeanInspector implements MethodInterceptor {
 			// 子线程运行，创建子节点，并指向父节点
 			Node child = new Node(parent);
 			child.setBean(initBeanInspectModel(invocation));
-			child = parent.addChild(child);
+			parent.addChild(child);
 			// 并把子节点（当前节点）存到threadlocal中
 			safeNode.set(child);
 		}
@@ -76,7 +75,7 @@ public class BeanInspector implements MethodInterceptor {
 		result = invocation.proceed();
 		period = System.currentTimeMillis() - period;
 		try {
-			inspectAsync(invocation, result, period);
+			inspect(invocation, result, period);
 		} catch (Exception e) {
 			logger.error(e);
 		}
@@ -86,7 +85,7 @@ public class BeanInspector implements MethodInterceptor {
 				safeNode.set(currNode.getParent());
 			} else {
 				try {
-					nodeService.save(currNode);
+					producer.produce(currNode);
 				} catch (Exception e) {
 					logger.error(JacksonUtil.toJson(currNode), e);
 				} finally {
@@ -131,7 +130,8 @@ public class BeanInspector implements MethodInterceptor {
 
 		try {
 			BeanInspectorModel inspectorModel = new BeanInspectorModel();
-			inspectorModel.setCalledTimes(1);
+			// 现在还没开始调用
+			inspectorModel.setCalledTimes(0);
 			inspectorModel.setClazz(className);
 			inspectorModel.setMethod(methodName.toString());
 			inspectorModel.setRemarks(remarks.toString());
@@ -142,7 +142,7 @@ public class BeanInspector implements MethodInterceptor {
 		return null;
 	}
 
-	private void inspectAsync(MethodInvocation invocation, Object result, long period) {
+	private void inspect(MethodInvocation invocation, Object result, long period) {
 		Method method = invocation.getMethod();
 		StringBuilder methodName = new StringBuilder(method.getName());
 		methodName.append("(");
@@ -151,12 +151,13 @@ public class BeanInspector implements MethodInterceptor {
 		remarks.append("(");
 		Parameter[] params = method.getParameters();
 		Object[] args = invocation.getArguments();
-		for (int i = 0; i < params.length; i++) {
-			Parameter param = params[i];
-			if (i == 0) {
-				methodName.append(param.getType().getName() + " " + param.getName());
-				remarks.append((null == args[i] ? null : args[i].toString()));
-			} else {
+		int length = params.length;
+		if (length > 0) {
+			Parameter param = params[0];
+			methodName.append(param.getType().getName() + " " + param.getName());
+			remarks.append((null == args[0] ? null : args[0].toString()));
+			for (int i = 1; i < params.length; i++) {
+				param = params[i];
 				methodName.append(", " + param.getType().getName() + " " + param.getName());
 				remarks.append(", " + (null == args[i] ? null : args[i].toString()));
 			}
@@ -175,24 +176,19 @@ public class BeanInspector implements MethodInterceptor {
 
 		try {
 			Node currNode = safeNode.get();
-			if (currNode.getBean() == null) {
-				BeanInspectorModel inspectorModel = new BeanInspectorModel();
-				inspectorModel.setCalledTimes(1);
-				inspectorModel.setClazz(className);
-				inspectorModel.setMethod(methodName.toString());
-				inspectorModel.setRemarks(remarks.toString());
-				inspectorModel.setPeriod(period);
-				inspectorModel.setAvgPeriod(period);
-				inspectorModel.setReturnLineNum(returnLineNum);
-				currNode.setBean(inspectorModel);
-			} else {
+			if (currNode != null) {
 				BeanInspectorModel inspectorModel = currNode.getBean();
-				inspectorModel.setCalledTimes(inspectorModel.getCalledTimes() + 1);
-				inspectorModel.setPeriod(inspectorModel.getPeriod() + period);
-				inspectorModel.setAvgPeriod(inspectorModel.getPeriod() / inspectorModel.getCalledTimes());
-				inspectorModel.setReturnLineNum(
-						(int) ((inspectorModel.getReturnLineNum() * inspectorModel.getCalledTimes() + returnLineNum)
-								/ (inspectorModel.getCalledTimes() + 1)));
+				if (inspectorModel == null) {
+					inspectorModel = new BeanInspectorModel();
+					inspectorModel.setClazz(className);
+					inspectorModel.setMethod(methodName.toString());
+					inspectorModel.setRemarks(remarks.toString());
+					currNode.setBean(inspectorModel);
+				}
+				// 当前model: calledTime+1, period++, returnLineNum++
+				inspectorModel.mergeValue(period, returnLineNum);
+			} else {
+				logger.error(invocation);
 			}
 		} catch (Exception e) {
 			try {
