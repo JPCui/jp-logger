@@ -1,18 +1,11 @@
 package cn.cjp.logger.service;
 
-import java.util.List;
-
-import javax.annotation.Resource;
-
 import org.apache.log4j.Logger;
 import org.bson.Document;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.client.FindIterable;
@@ -26,13 +19,11 @@ import cn.cjp.logger.redis.RedisDao;
 import cn.cjp.logger.util.JacksonUtil;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-@Configuration
 @PropertySource(value = "classpath:/config.properties")
 @Component
-public class NodeConsumer implements Runnable, InitializingBean {
+public class NodeConsumer extends AbstractConsumer {
 
 	private static final Logger logger = Logger.getLogger(NodeConsumer.class);
-
 	/**
 	 * 异步任务执行器
 	 */
@@ -45,7 +36,7 @@ public class NodeConsumer implements Runnable, InitializingBean {
 	@Value("${config.queue.node}")
 	String queueName;
 
-	@Resource(name = "enableRedis")
+	@Autowired
 	RedisDao redisDao;
 
 	@Autowired
@@ -59,12 +50,8 @@ public class NodeConsumer implements Runnable, InitializingBean {
 		while (true) {
 			try {
 				// 阻塞队列操作
-				List<String> rec = redisDao.brpop(0, queueName);
-				if (logger.isDebugEnabled()) {
-					System.out.println(rec);
-				}
-				if (rec.size() == 2) {
-					String value = rec.get(1);
+				String value = pop();
+				if (value != null) {
 					Node node = JacksonUtil.fromJsonToObj(value, Node.class);
 					Document dbo = node.toDoc();
 					MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
@@ -95,7 +82,7 @@ public class NodeConsumer implements Runnable, InitializingBean {
 								node.getBean().getClazz()));
 					}
 				} else {
-					logger.error("cache read list error, the err value is " + rec);
+					logger.error("cache read list error, the err value is " + value);
 				}
 			} catch (JedisConnectionException e) {
 				logger.error("", e);
@@ -122,17 +109,19 @@ public class NodeConsumer implements Runnable, InitializingBean {
 		destModel.merge(sourceModel);
 	}
 
-	@Async
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		// 开启线程池
-		try {
-			asyncTaskExecutor.execute(this);
-			logger.info("log consumer thread start");
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
-		}
+	public SimpleAsyncTaskExecutor getAsyncTaskExecutor() {
+		return this.asyncTaskExecutor;
+	}
+
+	@Override
+	public RedisDao getRedisDao() {
+		return this.redisDao;
+	}
+
+	@Override
+	public String getQueueName() {
+		return this.queueName;
 	}
 
 }

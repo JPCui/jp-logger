@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.QueryOperators;
@@ -87,6 +88,44 @@ public class LogService {
 		return doc.get("_id");
 	}
 
+	public Page findAll(String level, String timeString, String keyword, int pageNum) throws Exception {
+		Date date = null;
+		if (!StringUtils.isEmpty(timeString)) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			date = sdf.parse(timeString);
+		}
+		Document filter = new Document();
+		if (date != null) {
+			filter.put("time", new BasicDBObject(QueryOperators.LTE, date));
+		}
+		if (!StringUtils.isEmpty(keyword)) {
+			filter.put("message", new BasicDBObject("$regex", keyword));
+		}
+
+		List<Object> logs = new ArrayList<>();
+		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+
+		MongoCollection<Document> dbc = db.getCollection(level);
+		MongoCursor<Document> cursor = null;
+		if (filter.isEmpty()) {
+			cursor = dbc.find().skip((pageNum - 1) * default_page_size).sort(new BasicDBObject("time", -1))
+					.limit(default_page_size).iterator();
+		} else {
+			cursor = dbc.find(filter).skip((pageNum - 1) * default_page_size).sort(new BasicDBObject("time", -1))
+					.limit(default_page_size).iterator();
+		}
+
+		while (cursor.hasNext()) {
+			Document dbo = cursor.next();
+			Log log = Log.fromDoc(dbo);
+			logs.add(log);
+		}
+
+		Page page = new Page(pageNum, default_page_size, dbc.count(), logs);
+		return page;
+	}
+
+	@Deprecated
 	public Page findAllByTime(String level, String timeString, int pageNum) throws Exception {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = sdf.parse(timeString);
@@ -111,6 +150,7 @@ public class LogService {
 		return page;
 	}
 
+	@Deprecated
 	public Page findAll(String level, int pageNum) {
 
 		List<Object> logs = new ArrayList<>();

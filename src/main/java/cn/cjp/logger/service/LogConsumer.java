@@ -1,18 +1,11 @@
 package cn.cjp.logger.service;
 
-import java.util.List;
-
-import javax.annotation.Resource;
-
 import org.apache.log4j.Logger;
 import org.bson.Document;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.client.MongoCollection;
@@ -25,11 +18,15 @@ import cn.cjp.logger.util.JacksonUtil;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 @Component
-@Configuration
 @PropertySource(value = "classpath:/config.properties")
-public class LogConsumer implements Runnable, InitializingBean {
+public class LogConsumer extends AbstractConsumer {
 
 	private static final Logger logger = Logger.getLogger(LogConsumer.class);
+	/**
+	 * 异步任务执行器
+	 */
+	@Autowired
+	SimpleAsyncTaskExecutor asyncTaskExecutor;
 
 	/**
 	 * 日志队列
@@ -37,17 +34,11 @@ public class LogConsumer implements Runnable, InitializingBean {
 	@Value("${config.queue.log}")
 	String queueName;
 
-	/**
-	 * 异步任务执行器
-	 */
 	@Autowired
-	SimpleAsyncTaskExecutor asyncTaskExecutor;
+	RedisDao redisDao;
 
 	@Value("${config.collection.prefix}")
 	String collectionPrefix;
-
-	@Resource(name = "enableRedis")
-	RedisDao redisDao;
 
 	@Autowired
 	MongoDao mongoDao;
@@ -57,9 +48,8 @@ public class LogConsumer implements Runnable, InitializingBean {
 		while (true) {
 			try {
 				// 阻塞队列操作
-				List<String> rec = redisDao.brpop(0, queueName);
-				if (rec.size() == 2) {
-					String value = rec.get(1);
+				String value = pop();
+				if (value != null) {
 					Log log = JacksonUtil.fromJsonToObj(value, Log.class);
 					Document dbo = log.toDoc();
 					MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
@@ -72,7 +62,7 @@ public class LogConsumer implements Runnable, InitializingBean {
 								String.format("[%s]insert new log %s, msg: %s", collectionName, _id, log.getMessage()));
 					}
 				} else {
-					logger.error("cache read list error, the err value is " + rec);
+					logger.error("cache read list error, the err value is " + value);
 				}
 			} catch (JedisConnectionException e) {
 				logger.error("", e);
@@ -83,17 +73,19 @@ public class LogConsumer implements Runnable, InitializingBean {
 		}
 	}
 
-	@Async
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		// 开启线程池
-		try {
-			asyncTaskExecutor.execute(this);
-			logger.info("log consumer thread start");
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw e;
-		}
+	public SimpleAsyncTaskExecutor getAsyncTaskExecutor() {
+		return this.asyncTaskExecutor;
+	}
+
+	@Override
+	public RedisDao getRedisDao() {
+		return this.redisDao;
+	}
+
+	@Override
+	public String getQueueName() {
+		return this.queueName;
 	}
 
 }
