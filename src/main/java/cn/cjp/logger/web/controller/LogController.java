@@ -4,7 +4,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,7 +63,8 @@ public class LogController {
 	 */
 	@RequestMapping(value = "/{level}")
 	public ModelAndView log(HttpServletResponse response, @RequestParam(value = "time", defaultValue = "") String time,
-			@PathVariable("level") String level, @RequestParam(defaultValue = "1") int _pageNum) throws Exception {
+			@PathVariable("level") String level, @RequestParam(defaultValue = "1") int _pageNum,
+			@RequestParam(defaultValue = "") String keyword) throws Exception {
 		// response.setHeader("Access-Control-Allow-Origin", "*"); //
 		// 允许哪些url可以跨域请求到本域
 		// response.setHeader("Access-Control-Allow-Methods", "GET"); //
@@ -73,11 +73,7 @@ public class LogController {
 		// "x-requested-with,content-type"); // 允许哪些请求头可以跨域
 		_pageNum = _pageNum < 1 ? 1 : _pageNum;
 		Page model;
-		if (StringUtils.isEmpty(time)) {
-			model = logService.findAll(level, _pageNum);
-		} else {
-			model = logService.findAllByTime(level, time, _pageNum);
-		}
+		model = logService.findAll(level, time, keyword, _pageNum);
 
 		ModelAndView mv = new ModelAndView("logs/index");
 		mv.addObject("time", time);
