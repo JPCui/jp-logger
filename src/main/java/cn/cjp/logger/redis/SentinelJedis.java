@@ -421,4 +421,14 @@ public class SentinelJedis implements RedisDao {
 		});
 	}
 
+	@Override
+	public List<String> blpop(int timeout, String key) {
+		return execute(new JedisCallback<List<String>>() {
+			@Override
+			public List<String> doInJedis(Jedis jedis) {
+				return jedis.blpop(timeout, key);
+			}
+		});
+	}
+
 }

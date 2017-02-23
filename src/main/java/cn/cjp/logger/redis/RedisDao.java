@@ -40,6 +40,8 @@ public interface RedisDao extends Closeable {
 	 */
 	List<String> brpop(int timeout, String key);
 
+	List<String> blpop(int timeout, String key);
+
 	Long zrank(String key, String member);
 
 	Long zadd(String key, double score, String member);
