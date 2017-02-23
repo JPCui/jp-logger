@@ -1,5 +1,7 @@
 package cn.cjp.logger.service;
 
+import javax.annotation.Resource;
+
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,7 @@ public class LogConsumer extends AbstractConsumer {
 	@Value("${config.queue.log}")
 	String queueName;
 
-	@Autowired
+	@Resource(name = "enableRedis")
 	RedisDao redisDao;
 
 	@Value("${config.collection.prefix}")

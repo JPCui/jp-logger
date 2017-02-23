@@ -1,5 +1,7 @@
 package cn.cjp.logger.service;
 
+import javax.annotation.Resource;
+
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ public class NodeConsumer extends AbstractConsumer {
 	@Value("${config.queue.node}")
 	String queueName;
 
-	@Autowired
+	@Resource(name = "enableRedis")
 	RedisDao redisDao;
 
 	@Autowired
