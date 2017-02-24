@@ -107,7 +107,11 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 			root.setMaxPeriod(branch.getPeriod());
 		}
 		root.setPeriod(period + branch.getPeriod());
-		root.setAvgPeriod(root.getPeriod() / root.getCalledTimes());
+		if (root.getCalledTimes() == 0) {
+			root.setAvgPeriod(root.getPeriod() / 1);
+		} else {
+			root.setAvgPeriod(root.getPeriod() / root.getCalledTimes());
+		}
 
 		if (branch.getReturnLineNum() > maxReturnLineNum) {
 			root.setMaxReturnLineNum(branch.getReturnLineNum());

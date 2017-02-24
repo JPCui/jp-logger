@@ -34,11 +34,13 @@
 
 - run the following command:
 
-> mvn clean package -Prunnable-war -Dskip.test=true
+> mvn clean package -Dskip.test=true
 
 - run it
 
 > java -jar jp-logger-1.1.0.Release-war-exec.jar
+
+- 如果想修改端口，需要配置 server.xml
 
 2. 使用maven插件对java工程进行打包
 
