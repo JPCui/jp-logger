@@ -7,6 +7,7 @@ import org.apache.log4j.spi.LoggingEvent;
 
 import cn.cjp.logger.model.Log;
 import cn.cjp.logger.service.LogPublish;
+import cn.cjp.utils.StringUtil;
 
 /**
  * 
@@ -15,9 +16,13 @@ import cn.cjp.logger.service.LogPublish;
  */
 public class RedisAppender extends AppenderSkeleton {
 
+	public static final String DEFAULT_QUEUE = "QUEUE|LOG";
+
 	private static RedisDao redisDao;
 
 	private static LogPublish logPubSub;
+
+	private String queue;
 
 	public RedisAppender() throws IOException {
 	}
@@ -28,6 +33,10 @@ public class RedisAppender extends AppenderSkeleton {
 
 		logPubSub = new LogPublish();
 		logPubSub.setRedisDao(redisDao);
+		if (StringUtil.isEmpty(queue)) {
+			queue = DEFAULT_QUEUE;
+		}
+		logPubSub.setQueue(queue);
 		System.err.println(String.format("Activate appender."));
 	}
 
@@ -53,8 +62,16 @@ public class RedisAppender extends AppenderSkeleton {
 			log.setName(this.getName());
 			logPubSub.publish(log);
 		} catch (Exception e) {
-			System.err.println(e);
+			print(e);
 		}
+	}
+
+	public void setQueue(String queue) {
+		this.queue = queue;
+	}
+
+	private void print(Object message) {
+		System.err.println("cn.cjp.logger.redis.RedisAppender -> " + message);
 	}
 
 }

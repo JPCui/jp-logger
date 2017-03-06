@@ -89,7 +89,7 @@ public class RedisDaoBuilder {
 
 	public static void main(String[] args) {
 		RedisDao redisDao = RedisDaoBuilder.instance();
-		System.out.println(redisDao.info());
+		System.out.println(redisDao.hgetAll("v"));
 	}
 
 }

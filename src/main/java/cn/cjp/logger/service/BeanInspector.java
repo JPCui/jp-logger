@@ -1,5 +1,7 @@
 package cn.cjp.logger.service;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
@@ -36,7 +38,7 @@ import cn.cjp.logger.util.JacksonUtil;
  * @author JinPeng Cui
  *
  */
-public class BeanInspector implements MethodInterceptor {
+public class BeanInspector implements MethodInterceptor, Closeable {
 
 	private static Logger logger = Logger.getLogger(BeanInspector.class);
 
@@ -196,6 +198,11 @@ public class BeanInspector implements MethodInterceptor {
 			} catch (Exception e2) {
 			}
 		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		safeNode.remove();
 	}
 
 }

@@ -1,6 +1,6 @@
-# introduce
+# Introduce
 	
-	由于项目做了分布，为了便于管理系统运行日志，使用log4mongo将日志存储到mongodb上
+	由于项目做了简单的分布，为了便于管理系统运行日志，使用log4mongo将日志存储到mongodb上
 	
 	暂时只记录系统运行日志，所以没有用kafka, ELK这些比较重的框架
 	
@@ -12,30 +12,28 @@
 	
 	目前存在的问题：
 		
-		NodeConsumer 不支持并发
+		NodeConsumer 不支持高并发，因为一个节点要增量更新，可以通过使用更高级的 Mongo API （findAndUpdate） 来解决。
 	
-# frameworks
+# Environment & Frameworks
 
-- java7/8, spring boot, maven
-- angularjs
+- java8, spring boot, maven
+- freemarker
+- jquery, angularjs
 - redis
 - mongodb
 	
-# java config
+# Java Config
 
-```
- # 配置mongodb
- cn.cjp.logger.mongo.MongoConfig
+- MongoConfig
+	配置 mongo client
 
- # 配置redis
- # 注意：我这里redis服务器部署了sentinel
- cn.cjp.logger.redis.RedisConfig
+- RedisConfig
+	注意：我这里redis服务器部署了sentinel
 
- # 配置MVC，取代application.properties中的配置
- cn.cjp.logger.web.controller.MVCConfig
-```
+- MVCConfig
+	配置MVC，取代application.properties中的部分配置
 
-# 运行一下
+# Run it
 
 - 运行*cn.cjp.logger.service.LogServiceTest#report()*，添加测试数据
 
@@ -43,20 +41,21 @@
 
     - 页面1：
 
-    访问：http://local:8080/log/DEBUG
+    访问：/jp-logger/log/info
     
     这是一个简单的查看页面
 
     - 页面2：
 
-    访问：http://local:8080/pages/index.html
+    访问：/jp-logger/log/inspector
     
-    这里异步加载*http://local:8080/log/DEBUG.json*来显示到页面上
+    这里异步加载 */jp-logger/log/inspector.json* 来显示到页面上
 
-## 其他
+## Others
 
-- cn.cjp.logger.service.LogConsumerManager
-    
-    使用线程池监听(redis.brpop)日志队列
+- LogConsumer
 
+- NodeConsumer
 
+- cn.cjp.logger.service.BeanInspector
+	call tree 核心类（AOP）
