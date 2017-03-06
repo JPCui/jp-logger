@@ -29,6 +29,14 @@ public class LogController {
 
 	@RequestMapping("/inspector")
 	@ResponseBody
+	public ModelAndView toInspector() throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("/logs/inspector");
+		return mv;
+	}
+
+	@RequestMapping("/inspector.json")
+	@ResponseBody
 	public ModelAndView inspector(@RequestParam(defaultValue = BeanInspectorModel.AVGPERIOD) String sortedName,
 			@RequestParam(defaultValue = "1") int _pageNum) throws Exception {
 		_pageNum = _pageNum < 1 ? 1 : _pageNum;
@@ -37,6 +45,13 @@ public class LogController {
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("data", model);
 		mv.setViewName("/logs/inspector");
+		return mv;
+	}
+
+	@RequestMapping("/treeView")
+	@ResponseBody
+	public ModelAndView treeView() throws Exception {
+		ModelAndView mv = new ModelAndView("/logs/treeView");
 		return mv;
 	}
 
@@ -74,12 +89,13 @@ public class LogController {
 		_pageNum = _pageNum < 1 ? 1 : _pageNum;
 		Page model = logService.findAll(level, time, keyword, _pageNum);
 
-		ModelAndView mv = new ModelAndView("logs/index");
+		ModelAndView mv = new ModelAndView("/logs/index");
 		mv.addObject("time", time);
 		mv.addObject("list", model.getResultList());
 		mv.addObject("_pageNum", model.currPage);
 		mv.addObject("nextPage", model.nextPage);
 		mv.addObject("prevPage", model.prevPage);
+		mv.addObject("keyword", keyword);
 		return mv;
 	}
 
