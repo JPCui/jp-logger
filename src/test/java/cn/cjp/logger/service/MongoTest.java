@@ -1,32 +1,47 @@
 package cn.cjp.logger.service;
 
-import java.net.UnknownHostException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bson.Document;
-import org.bson.types.ObjectId;
+import org.junit.Test;
 
 import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 
+import cn.cjp.logger.model.Log;
+import cn.cjp.logger.mongo.MongoDao;
+
 public class MongoTest {
-	public static void main(String[] args) throws UnknownHostException {
 
-		MongoClient client = new MongoClient("mongo.host");
-		MongoDatabase db = client.getDatabase("cjp_logger");
+	@Test
+	public void t2() throws IOException {
+		MongoDao mongoDao = new MongoDao();
+		mongoDao.getDB().getCollection("info").insertOne(new Log().toDoc());
+		System.out.println(mongoDao.getDB().getCollection("log_visit").count());
+		mongoDao.close();
+	}
 
-		Document query = new Document();
-		query.put("_id", new ObjectId("58acf848aa5bb2d9d406d5cd"));
+	@Test
+	public void t1() {
 
-		Document update = new Document();
-		Document d1 = new Document();
-		d1.put("host", new Document("hostAddress", "1.1.1.2"));
-		update.put("$set", d1);
+		ServerAddress addr = new ServerAddress("mongo.host", 27017);
 
-		MongoCollection<Document> coll = db.getCollection("visit");
-		System.out.println(coll.findOneAndUpdate(query, update));
+		List<MongoCredential> credentials = new ArrayList<>();
+		credentials.add(MongoCredential.createCredential("<hidden>", "<hidden>", "<hidden>".toCharArray()));
 
-		client.close();
+		MongoClient mongoClient = new MongoClient(addr, credentials);
+		MongoDatabase db = mongoClient.getDatabase("<hidden>");
+		System.out.println(db.listCollections());
+
+		Document doc = new Log().toDoc();
+		mongoClient.getDatabase("<hidden>").getCollection("info").insertOne(doc);
+		System.out.println(doc);
+
+		mongoClient.close();
 	}
 
 }

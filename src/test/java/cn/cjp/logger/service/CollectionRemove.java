@@ -1,30 +1,37 @@
 package cn.cjp.logger.service;
 
 import java.net.UnknownHostException;
+import java.util.Date;
 
-import org.bson.BsonDocument;
+import org.bson.Document;
 
 import com.mongodb.MongoClient;
+import com.mongodb.QueryOperators;
 import com.mongodb.client.MongoDatabase;
 
+import cn.cjp.utils.Logger;
+
 public class CollectionRemove {
+
+	static Logger logger = Logger.getLogger(CollectionRemove.class);
+
 	public static void main(String[] args) throws UnknownHostException {
 
-		// Date date = DateUtil.add(Calendar.DAY_OF_YEAR, -2);
+		Date date = new Date();
 		// DBObject query = new BasicDBObject("time", new
 		// BasicDBObject(QueryOperators.LTE, date));
 		// DBObject query = new BasicDBObject();
-		BsonDocument query = new BsonDocument();
+		Document query = new Document();
+		query.append("time", new Document(QueryOperators.LTE, date));
 
 		MongoClient client = new MongoClient("mongo.host");
 		MongoDatabase db = client.getDatabase("cjp_logger");
-		System.out.println(db.getCollection("visit").count());
-		System.out.println(db.getCollection("info").deleteMany(query));
-		System.out.println(db.getCollection("warn").deleteMany(query));
-		System.out.println(db.getCollection("error").deleteMany(query));
-		System.out.println(db.getCollection("visit").deleteMany(query));
-		System.out.println(db.getCollection("bean_inspector").deleteMany(query));
-		System.out.println(db.getCollection("bean_inspector_node").deleteMany(query));
+		logger.info(db.getCollection("visit").count());
+		logger.info(db.getCollection("info").deleteMany(query));
+		logger.info(db.getCollection("warn").deleteMany(query));
+		logger.info(db.getCollection("error").deleteMany(query));
+		logger.info(db.getCollection("visit").deleteMany(query));
+		logger.info(db.getCollection("bean_inspector_node").deleteMany(query));
 		client.close();
 	}
 

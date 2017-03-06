@@ -27,8 +27,8 @@ public class LogServiceTest {
 	LogService logService;
 
 	@Test
-	public void findAll() {
-		Object obj = logService.findAll("DEBUG", 1);
+	public void findAll() throws Exception {
+		Object obj = logService.findAll("DEBUG", null, null, 1);
 		System.out.println(JacksonUtil.toJson(obj));
 	}
 
