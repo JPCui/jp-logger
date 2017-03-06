@@ -19,6 +19,22 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>cn.cjp</groupId>
+			<artifactId>jp-base</artifactId>
+			<version>v2017.0228</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<version>1.13.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>4.2.1.RELEASE</version>
+		</dependency>
+
 		<!-- Jackson Configuration BEGIN -->
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
@@ -79,6 +95,11 @@
 		<!-- spring boot begin -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-freemarker</artifactId>
+			<version>${spring-boot.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j</artifactId>
 			<version>${spring-boot.version}</version>
 		</dependency>
@@ -132,7 +153,20 @@
 		</snapshotRepository>
 	</distributionManagement>
 
+	<profiles>
+		<!-- 线上环境 -->
+		<profile>
+			<id>online</id>
+			<properties>
+				<deploy.server>ONLINE</deploy.server>
+				<deploy.url>http://online.host:8888/manager/text</deploy.url>
+				<plugin.compile.skip>true</plugin.compile.skip>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
+		<finalName>${project.artifactId}</finalName>
 
 		<plugins>
 			<!--boot maven -->
@@ -194,9 +228,13 @@
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>
 				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.1</version>
+				<version>2.2</version>
 				<configuration>
-					<port>80</port>
+					<uriEncoding>${project.build.sourceEncoding}</uriEncoding>
+					<update>true</update>
+					<url>${deploy.url}</url>
+					<server>${deploy.server}</server>
+					<ignorePackaging>true</ignorePackaging>
 				</configuration>
 				<executions>
 					<execution>
