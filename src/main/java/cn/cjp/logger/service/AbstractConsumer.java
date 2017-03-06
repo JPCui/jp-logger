@@ -7,7 +7,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 
 import cn.cjp.logger.redis.RedisDao;
-import cn.cjp.logger.util.Logger;
+import cn.cjp.utils.Logger;
 
 public abstract class AbstractConsumer implements Runnable, InitializingBean {
 

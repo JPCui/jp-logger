@@ -56,7 +56,7 @@ public class NodeConsumer extends AbstractConsumer {
 				if (value != null) {
 					Node node = JacksonUtil.fromJsonToObj(value, Node.class);
 					Document dbo = node.toDoc();
-					MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+					MongoDatabase db = mongoDao.getDB();
 					MongoCollection<Document> dbc = db.getCollection(collectionName);
 
 					Document query = new Document();

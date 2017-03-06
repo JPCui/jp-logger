@@ -28,6 +28,10 @@ public class LogPublish {
 
 	@Value("${config.queue.log}")
 	String queue;
+	
+	public void setQueue(String queue) {
+		this.queue = queue;
+	}
 
 	public void setRedisDao(RedisDao redisDao) {
 		this.redisDao = redisDao;

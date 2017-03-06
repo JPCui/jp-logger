@@ -54,7 +54,7 @@ public class LogConsumer extends AbstractConsumer {
 				if (value != null) {
 					Log log = JacksonUtil.fromJsonToObj(value, Log.class);
 					Document dbo = log.toDoc();
-					MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+					MongoDatabase db = mongoDao.getDB();
 					final String collectionName = collectionPrefix + log.getName().toLowerCase();
 					MongoCollection<Document> dbc = db.getCollection(collectionName);
 					dbc.insertOne(dbo);

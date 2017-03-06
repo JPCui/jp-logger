@@ -1,5 +1,6 @@
 package cn.cjp.logger.service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -88,7 +89,7 @@ public class LogService {
 		return doc.get("_id");
 	}
 
-	public Page findAll(String level, String timeString, String keyword, int pageNum) throws Exception {
+	public Page findAll(String level, String timeString, String keyword, int pageNum) throws ParseException {
 		Date date = null;
 		if (!StringUtils.isEmpty(timeString)) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -103,7 +104,7 @@ public class LogService {
 		}
 
 		List<Object> logs = new ArrayList<>();
-		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+		MongoDatabase db = mongoDao.getDB();
 
 		MongoCollection<Document> dbc = db.getCollection(level);
 		MongoCursor<Document> cursor = null;
@@ -133,7 +134,7 @@ public class LogService {
 		filter.put("time", new BasicDBObject(QueryOperators.LTE, date));
 
 		List<Object> logs = new ArrayList<>();
-		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+		MongoDatabase db = mongoDao.getDB();
 
 		MongoCollection<Document> dbc = db.getCollection(collection(level));
 		FindIterable<Document> it = dbc.find(filter).skip((pageNum - 1) * default_page_size)
@@ -150,11 +151,18 @@ public class LogService {
 		return page;
 	}
 
+	/**
+	 * 
+	 * @param level
+	 * @param pageNum
+	 * @return
+	 * @deprecated use {@link #findAll(String, String, String, int)} instead
+	 */
 	@Deprecated
 	public Page findAll(String level, int pageNum) {
 
 		List<Object> logs = new ArrayList<>();
-		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+		MongoDatabase db = mongoDao.getDB();
 
 		MongoCollection<Document> dbc = db.getCollection(collection(level));
 		FindIterable<Document> it = dbc.find().skip((pageNum - 1) * default_page_size)
@@ -174,7 +182,7 @@ public class LogService {
 	public Page findAllToMap(String level, int pageNum) {
 
 		List<Object> logs = new ArrayList<>();
-		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+		MongoDatabase db = mongoDao.getDB();
 
 		MongoCollection<Document> dbc = db.getCollection(collection(level));
 		FindIterable<Document> it = dbc.find().skip((pageNum - 1) * default_page_size)
@@ -197,7 +205,7 @@ public class LogService {
 		filter.put("time", new BasicDBObject(QueryOperators.LTE, date));
 
 		List<Object> logs = new ArrayList<>();
-		MongoDatabase db = mongoDao.getDB(mongoDao.getDatabase());
+		MongoDatabase db = mongoDao.getDB();
 
 		MongoCollection<Document> dbc = db.getCollection(collection(level));
 		MongoCursor<Document> cursor = dbc.find(filter).skip((pageNum - 1) * default_page_size)
