@@ -23,6 +23,7 @@ import cn.cjp.logger.model.Log;
 import cn.cjp.logger.util.PropertiesUtil;
 
 /**
+ * 可以使用 {@link #build(ServerAddress, List, Builder)} 来实例化 MongoDao
  * 
  * @author Jinpeng Cui
  */
@@ -37,9 +38,13 @@ public class MongoDao implements InitializingBean, Closeable {
 	private String username;
 	private String password;
 	private String database;
+	private String defaultDatabase;
+
+	private int connectionsPerHost = 10;
+	private int minConnectionsPerHost = 0;
 
 	private int connectTimeout;
-	private int heartbeatConnectRetryFrequency;
+	private int heartbeatFrequency;
 	private int heartbeatConnectTimeout;
 	private int heartbeatSocketTimeout;
 
@@ -47,25 +52,31 @@ public class MongoDao implements InitializingBean, Closeable {
 
 	private boolean closed = false;
 
+	/**
+	 * 根据默认配置文件生成 MongoDao
+	 * 
+	 * @throws IOException
+	 */
 	public MongoDao() throws IOException {
-		init();
+		initProperties();
 		client = createMongoClient();
 	}
 
-	public MongoDao(String host, int port, String username, String password, String database, int connectTimeout,
-			int heartbeatConnectRetryFrequency, int heartbeatConnectTimeout, int heartbeatSocketTimeout)
-			throws IOException {
-		this.host = host;
-		this.port = port;
-		this.username = username;
-		this.password = password;
-		this.database = database;
+	private MongoDao(MongoClient client) {
+		this.client = client;
+	}
 
-		this.connectTimeout = connectTimeout;
-		this.heartbeatConnectRetryFrequency = heartbeatConnectRetryFrequency;
-		this.heartbeatConnectTimeout = heartbeatConnectTimeout;
-		this.heartbeatSocketTimeout = heartbeatSocketTimeout;
-		client = createMongoClient();
+	/**
+	 * 
+	 * @param addr
+	 * @param credentials
+	 * @param builder
+	 * @return
+	 */
+	public static MongoDao build(ServerAddress addr, List<MongoCredential> credentials, Builder builder) {
+		MongoClientOptions options = builder.build();
+		MongoClient mongoClient = new MongoClient(addr, credentials, options);
+		return new MongoDao(mongoClient);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -75,7 +86,12 @@ public class MongoDao implements InitializingBean, Closeable {
 		mongoDao.close();
 	}
 
-	private void init() throws IOException {
+	/**
+	 * mongo.properties
+	 * 
+	 * @throws IOException
+	 */
+	private void initProperties() throws IOException {
 		try {
 			PropertiesUtil props = new PropertiesUtil("mongo.properties");
 			host = props.getValue("mongo.host");
@@ -84,8 +100,11 @@ public class MongoDao implements InitializingBean, Closeable {
 			password = props.getValue("mongo.password");
 			database = props.getValue("mongo.database");
 
+			connectionsPerHost = props.getInt("mongo.connectionsPerHost", 100);
+			minConnectionsPerHost = props.getInt("mongo.minConnectionsPerHost", 0);
+
 			connectTimeout = props.getInt("mongo.connectTimeout", 20_000);
-			heartbeatConnectRetryFrequency = props.getInt("mongo.heartbeatConnectRetryFrequency", 10);
+			heartbeatFrequency = props.getInt("mongo.heartbeatFrequency", 10);
 			heartbeatConnectTimeout = props.getInt("mongo.heartbeatConnectTimeout", 20_000);
 			heartbeatSocketTimeout = props.getInt("mongo.heartbeatSocketTimeout", 20_000);
 		} catch (IOException e) {
@@ -97,20 +116,20 @@ public class MongoDao implements InitializingBean, Closeable {
 	private MongoClient createMongoClient() throws UnknownHostException {
 		ServerAddress addr = new ServerAddress(host, port);
 
-		MongoCredential credential = MongoCredential.createMongoCRCredential(username, database,
-				password.toCharArray());
+		MongoCredential credential = MongoCredential.createCredential(username, database, password.toCharArray());
 		List<MongoCredential> credentials = new ArrayList<>();
 		credentials.add(credential);
 
-		MongoClientOptions options = new Builder().connectTimeout(connectTimeout)
-				.heartbeatFrequency(heartbeatConnectRetryFrequency).heartbeatConnectTimeout(heartbeatConnectTimeout)
-				.heartbeatSocketTimeout(heartbeatSocketTimeout).build();
+		MongoClientOptions options = new Builder().connectTimeout(connectTimeout).heartbeatFrequency(heartbeatFrequency)
+				.heartbeatConnectTimeout(heartbeatConnectTimeout).heartbeatSocketTimeout(heartbeatSocketTimeout)
+				.connectionsPerHost(connectionsPerHost).minConnectionsPerHost(minConnectionsPerHost).sslEnabled(false)
+				.build();
 		MongoClient mongoClient = new MongoClient(addr, credentials, options);
 		return mongoClient;
 	}
 
 	public MongoDatabase getDB() {
-		return client.getDatabase(database);
+		return client.getDatabase(defaultDatabase);
 	}
 
 	public MongoDatabase getDB(String databaseName) {
@@ -195,12 +214,12 @@ public class MongoDao implements InitializingBean, Closeable {
 		this.connectTimeout = connectTimeout;
 	}
 
-	public int getHeartbeatConnectRetryFrequency() {
-		return heartbeatConnectRetryFrequency;
+	public int getHeartbeatFrequency() {
+		return heartbeatFrequency;
 	}
 
-	public void setHeartbeatConnectRetryFrequency(int heartbeatConnectRetryFrequency) {
-		this.heartbeatConnectRetryFrequency = heartbeatConnectRetryFrequency;
+	public void setHeartbeatFrequency(int heartbeatFrequency) {
+		this.heartbeatFrequency = heartbeatFrequency;
 	}
 
 	public int getHeartbeatConnectTimeout() {
@@ -217,6 +236,18 @@ public class MongoDao implements InitializingBean, Closeable {
 
 	public void setHeartbeatSocketTimeout(int heartbeatSocketTimeout) {
 		this.heartbeatSocketTimeout = heartbeatSocketTimeout;
+	}
+
+	public void setConnectionsPerHost(int connectionsPerHost) {
+		this.connectionsPerHost = connectionsPerHost;
+	}
+
+	public void setMinConnectionsPerHost(int minConnectionsPerHost) {
+		this.minConnectionsPerHost = minConnectionsPerHost;
+	}
+	
+	public void setDefaultDatabase(String defaultDatabase) {
+		this.defaultDatabase = defaultDatabase;
 	}
 
 	private void buildIndex() {
