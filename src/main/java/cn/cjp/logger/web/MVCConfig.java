@@ -1,10 +1,14 @@
 package cn.cjp.logger.web;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.freemarker.FreeMarkerProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,10 +32,12 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
+import cn.cjp.freemarker.template.ext.StringIgnoreNullMethod;
 import cn.cjp.logger.web.interceptor.LoginRequiredInterceptor;
 import cn.cjp.web.Symphony;
 
@@ -68,9 +74,33 @@ public class MVCConfig extends WebMvcConfigurationSupport {
 		// viewResolver.setRequestContextAttribute("rc");
 		viewResolver.setAttributes(Symphony.SYMPHONY_PROPS);
 
-		// freemarker.template.Configuration
-
 		return viewResolver;
+	}
+
+	@Autowired
+	FreeMarkerProperties properties;
+
+	/**
+	 * override {@link FreeMarkerConfigurer
+	 * org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration.FreeMarkerWebConfiguration.freeMarkerConfigurer()}
+	 * 
+	 * @return
+	 */
+	@Bean
+	public FreeMarkerConfigurer freeMarkerConfigurer() {
+		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+		configurer.setTemplateLoaderPaths(this.properties.getTemplateLoaderPath());
+		configurer.setPreferFileSystemAccess(this.properties.isPreferFileSystemAccess());
+		configurer.setDefaultEncoding(this.properties.getCharsetName());
+		Properties settings = new Properties();
+		settings.putAll(this.properties.getSettings());
+		configurer.setFreemarkerSettings(settings);
+
+		// 自定义method
+		Map<String, Object> variables = new HashMap<String, Object>();
+		variables.put("stringIgnoreNull", new StringIgnoreNullMethod());
+		configurer.setFreemarkerVariables(variables);
+		return configurer;
 	}
 
 	/**
