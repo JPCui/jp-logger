@@ -163,6 +163,15 @@
 				<plugin.compile.skip>true</plugin.compile.skip>
 			</properties>
 		</profile>
+		<!-- 测试环境 -->
+		<profile>
+			<id>onTest</id>
+			<properties>
+				<deploy.server>Test</deploy.server>
+				<deploy.url>http://test.host:8888/manager/text</deploy.url>
+				<plugin.compile.skip>true</plugin.compile.skip>
+			</properties>
+		</profile>
 	</profiles>
 
 	<build>
