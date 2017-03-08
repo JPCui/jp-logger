@@ -14,8 +14,28 @@ import com.mongodb.client.MongoDatabase;
 
 import cn.cjp.logger.model.Log;
 import cn.cjp.logger.mongo.MongoDao;
+import cn.cjp.utils.PropertiesUtil;
 
 public class MongoTest {
+
+	static String host;
+	static int port;
+	static String database;
+	static String username;
+	static String password;
+
+	static {
+		try {
+			PropertiesUtil props = new PropertiesUtil("/mongo.properties");
+			host = props.getValue("mongo.host");
+			port = props.getInt("mongo.port", 27017);
+			database = props.getValue("mongo.database");
+			username = props.getValue("mongo.username");
+			password = props.getValue("mongo.password");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Test
 	public void t2() throws IOException {
@@ -28,17 +48,17 @@ public class MongoTest {
 	@Test
 	public void t1() {
 
-		ServerAddress addr = new ServerAddress("mongo.host", 27017);
+		ServerAddress addr = new ServerAddress(host, 27017);
 
 		List<MongoCredential> credentials = new ArrayList<>();
-		credentials.add(MongoCredential.createCredential("<hidden>", "<hidden>", "<hidden>".toCharArray()));
+		credentials.add(MongoCredential.createCredential(username, database, password.toCharArray()));
 
 		MongoClient mongoClient = new MongoClient(addr, credentials);
-		MongoDatabase db = mongoClient.getDatabase("<hidden>");
+		MongoDatabase db = mongoClient.getDatabase(database);
 		System.out.println(db.listCollections());
 
 		Document doc = new Log().toDoc();
-		mongoClient.getDatabase("<hidden>").getCollection("info").insertOne(doc);
+		db.getCollection("info").insertOne(doc);
 		System.out.println(doc);
 
 		mongoClient.close();
