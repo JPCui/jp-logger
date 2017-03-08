@@ -18,6 +18,29 @@
 		<spring-boot.version>1.3.6.RELEASE</spring-boot.version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>for-git</id>
+			<url>file:${basedir}/repository</url>
+		</repository>
+	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>ali-repos</id>
+			<name>Ali Repository</name>
+			<url>http://maven.aliyun.com/nexus/content/groups/public</url>
+		</repository>
+
+		<repository>
+			<id>jp-base</id>
+			<name>jp-base</name>
+			<!-- url : https://github.com/JPCui/jp-base/raw/master/repository -->
+			<url>https://raw.githubusercontent.com/jpcui/jp-base/master/repository</url>
+		</repository>
+
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>cn.cjp</groupId>
@@ -70,11 +93,6 @@
 			<version>2.8.0</version>
 		</dependency>
 		<!-- Redis End -->
-		<dependency>
-			<groupId>jstl</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.1.2</version>
-		</dependency>
 		<dependency>
 			<groupId>taglibs</groupId>
 			<artifactId>standard</artifactId>
@@ -141,18 +159,6 @@
 		</dependency>
 	</dependencies>
 
-
-	<distributionManagement>
-		<repository>
-			<id>myRepo-releases</id>
-			<url>http://123.57.180.221:8081/nexus/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>myRepo-snapshots</id>
-			<url>http://123.57.180.221:8081/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 	<profiles>
 		<!-- 线上环境 -->
 		<profile>
@@ -178,14 +184,19 @@
 		<finalName>${project.artifactId}</finalName>
 
 		<plugins>
-			<!--boot maven -->
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<localRepositoryPath>${project.basedir}/cn/cjp/jp-logger/${project.version}</localRepositoryPath>
+					<localRepositoryPath>${localRepositoryPath}</localRepositoryPath>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
