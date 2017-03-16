@@ -47,7 +47,7 @@ public class LogConsumer extends AbstractConsumer {
 
 	public void run() {
 		logger.info("log consumer ready");
-		while (true) {
+		while (!shutdown) {
 			try {
 				// 阻塞队列操作
 				String value = pop();

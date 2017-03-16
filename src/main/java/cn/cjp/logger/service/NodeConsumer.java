@@ -49,7 +49,7 @@ public class NodeConsumer extends AbstractConsumer {
 
 	public void run() {
 		logger.info("node consumer ready");
-		while (true) {
+		while (!shutdown) {
 			try {
 				// 阻塞队列操作
 				String value = pop();
