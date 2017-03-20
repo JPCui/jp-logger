@@ -51,8 +51,12 @@ public class LoginRequiredInterceptor extends HandlerInterceptorAdapter {
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
 
+		if (isLocalRequest(request)) {
+			return true;
+		}
+
 		// 根据票据登录
-		if (!isTicketInvalid(request)) {
+		if (!isInvalid(request)) {
 			toLogin(request, response);
 			return false;
 		}
@@ -173,6 +177,16 @@ public class LoginRequiredInterceptor extends HandlerInterceptorAdapter {
 			isLogin = true;
 		}
 		return isLogin;
+	}
+
+	private boolean isInvalid(HttpServletRequest request) {
+		return isTicketInvalid(request);
+	}
+
+	private boolean isLocalRequest(HttpServletRequest request) {
+		String clientIp = request.getRemoteAddr();
+		String serverIp = request.getLocalAddr();
+		return clientIp.equals(serverIp);
 	}
 
 	private boolean isTicketInvalid(HttpServletRequest request) {
