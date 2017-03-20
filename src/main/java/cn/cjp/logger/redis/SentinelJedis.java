@@ -66,6 +66,10 @@ public class SentinelJedis implements RedisDao {
 		});
 	}
 
+	public Object callback(JedisCallback<Object> callback) {
+		return execute(callback);
+	}
+
 	/**
 	 * @see #getResource()
 	 * @param jedis

@@ -19,6 +19,8 @@ import redis.clients.jedis.Tuple;
  * @see BaseDao
  */
 public interface RedisDao extends Closeable {
+	
+	public Object callback(JedisCallback<Object> callback);
 
 	String ltrim(String key, long start, long end);
 
