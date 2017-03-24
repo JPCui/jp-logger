@@ -2,6 +2,7 @@ package cn.cjp.logger.redis;
 
 import java.io.IOException;
 
+import org.apache.log4j.Appender;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 
@@ -14,7 +15,7 @@ import cn.cjp.utils.StringUtil;
  * @author Jinpeng Cui
  *
  */
-public class RedisAppender extends AppenderSkeleton {
+public class RedisAppender extends AppenderSkeleton implements Appender {
 
 	public static final String DEFAULT_QUEUE = "QUEUE|LOG";
 
@@ -48,6 +49,7 @@ public class RedisAppender extends AppenderSkeleton {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.closed = true;
 	}
 
 	@Override

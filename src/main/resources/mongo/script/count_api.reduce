@@ -1,0 +1,7 @@
+function (key, values) {
+    var count = 0;
+    values.forEach(function (value) {
+        count += value;
+    });
+    return count;
+}

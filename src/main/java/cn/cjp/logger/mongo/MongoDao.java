@@ -57,13 +57,17 @@ public class MongoDao implements InitializingBean, Closeable {
 	 * 
 	 * @throws IOException
 	 */
-	public MongoDao() throws IOException {
+	private MongoDao() throws IOException {
 		initProperties();
 		client = createMongoClient();
 	}
 
 	private MongoDao(MongoClient client) {
 		this.client = client;
+	}
+
+	public static MongoDao newInstance() throws IOException {
+		return new MongoDao();
 	}
 
 	/**
@@ -99,6 +103,7 @@ public class MongoDao implements InitializingBean, Closeable {
 			username = props.getValue("mongo.username");
 			password = props.getValue("mongo.password");
 			database = props.getValue("mongo.database");
+			defaultDatabase = database;
 
 			connectionsPerHost = props.getInt("mongo.connectionsPerHost", 100);
 			minConnectionsPerHost = props.getInt("mongo.minConnectionsPerHost", 0);
@@ -245,7 +250,7 @@ public class MongoDao implements InitializingBean, Closeable {
 	public void setMinConnectionsPerHost(int minConnectionsPerHost) {
 		this.minConnectionsPerHost = minConnectionsPerHost;
 	}
-	
+
 	public void setDefaultDatabase(String defaultDatabase) {
 		this.defaultDatabase = defaultDatabase;
 	}

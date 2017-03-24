@@ -1,0 +1,11 @@
+function () {
+	var message = this.message;
+	if (message.indexOf("downloadServlet") === -1) {
+		var indexIpEnd = message.indexOf(" ");
+		var indexHttpStatusEnd = message.indexOf(" ", indexIpEnd + 1);
+		var indexApiEnd = message.indexOf(" ", indexHttpStatusEnd + 1);
+		var api = message.substr(indexHttpStatusEnd, indexApiEnd - indexHttpStatusEnd).trim();
+		var value = 1;
+		emit(api, value);
+	}
+}

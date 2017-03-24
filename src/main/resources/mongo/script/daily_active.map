@@ -1,0 +1,5 @@
+function() {
+	var time = this.time;
+	var hour = time.getHours();
+	emit(hour+"", 1);
+}

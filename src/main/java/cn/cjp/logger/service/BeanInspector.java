@@ -91,7 +91,7 @@ public class BeanInspector implements MethodInterceptor, Closeable {
 				} catch (Exception e) {
 					logger.error(JacksonUtil.toJson(currNode), e);
 				} finally {
-					safeNode.set(null);
+					safeNode.remove();
 				}
 			}
 		} else {

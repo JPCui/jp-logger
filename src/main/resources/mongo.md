@@ -37,4 +37,9 @@ db.auth(
 )
 ```
 
+# MapReduce
+
+/mongo.mr.properties
+
+mongo MapReduce 配置文件
 

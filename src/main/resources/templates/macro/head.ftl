@@ -1,5 +1,4 @@
-
-<#macro common_head title>
+<#macro head title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <#nested>
@@ -40,33 +39,3 @@
     </style>
     <title>${title}</title>
 </#macro>
-
-<#macro common_body>
-<div ng-app="tipAnimate" ng-controller="tipAController">
-    <div class="C-tip half-circle" ng-click="changeTip()"></div>
-    <div class="C-cate" ng-hide="A_hide">
-        <a href="${serverPath}/log/visit">VISIT</a> | 
-        <a href="${serverPath}/log/info">INFO</a> | 
-        <a href="${serverPath}/log/warn">WARN</a> | 
-        <a href="${serverPath}/log/error">ERROR</a> | 
-        <a href="${serverPath}/log/inspector">BeanInspector</a>
-    </div>
-</div>
-
-<#nested>
-</#macro>
-
-<#macro common_bottom>
-<script src="http://apps.bdimg.com/libs/angular.js/1.4.6/angular.min.js"></script>
-<script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular-animate.min.js"></script>
-<script>
-    var appTip = angular.module("tipAnimate", ["ngAnimate"]);
-    appTip.controller("tipAController", function ($scope) {
-        $scope.changeTip = function () {
-            $scope.A_hide = !$scope.A_hide;
-        };
-    });
-</script>
-<#nested>
-</#macro>
-

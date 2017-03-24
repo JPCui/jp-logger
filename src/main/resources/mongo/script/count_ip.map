@@ -1,0 +1,7 @@
+function() {
+	var message = this.message;
+	var indexIpEnd = message.indexOf(" ");
+	var ip = message.substr(0, indexIpEnd);
+	var value = 1;
+	emit(ip, value);
+}
