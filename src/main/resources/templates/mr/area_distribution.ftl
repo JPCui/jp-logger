@@ -48,7 +48,7 @@
 
             var option = {
                 title: {
-                    text: '访问量',
+                    text: '各地区访问量',
                     subtext: '基于访问日志',
                     x: 'center'
                 },
@@ -95,7 +95,7 @@
                 },
                 series: [
                     {
-                        name: '订单量',
+                        name: '访问量',
                         type: 'map',
                         mapType: 'china',
                         roam: false,

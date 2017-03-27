@@ -1,103 +1,60 @@
+<#include "../common.ftl">
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.css">
-    <style type="text/css">
-        .half-circle {
-            width: 30px;
-            height: 30px;
-            /* 水平半径 = width/2, 垂直半径 = height + padding */
-            border-radius: 0 0 20px 20px/0 0 20px 20px;
-            background-color: #f29900;
-            color: #fff;
-            text-align: center;
-            font-size: 1.6rem;
-        }
+<@common_head title="日志集中管理系统">
 
-        .C-cate {
-            margin: 10px auto;
-            width: 90%;
-            transition: all linear 0.5s;
-            background-color: lightblue;
-            position: relative;
-            top: 0;
-            left: 0;
-        }
+<style type="text/css">
+    ul.t-table, ul.t-table li {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 0 25px;
+        -webkit-margin-before: 0;
+        -webkit-margin-after: 0;
+        -webkit-padding-start: 0;
+        width: 90%;
+    }
+    ul.t-table li{
+        margin-top: 10px;
+    }
 
-        .C-tip {
-            position: absolute;
-            right: 10px;
-            top: -5px;
-        }
+    .t-op {
+        width: 30px;
+    }
 
-        .C-cate.ng-hide {
-            background-color: greenyellow;
-            top:-200px;
-            left: 200px;
-        }
-    </style>
-    <style type="text/css">
-        ul.t-table, ul.t-table li {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 0 25px;
-            -webkit-margin-before: 0;
-            -webkit-margin-after: 0;
-            -webkit-padding-start: 0;
-            width: 90%;
-        }
-        ul.t-table li{
-            margin-top: 10px;
-        }
+    .t-1{
+        width: 80px;
+    }
 
-        .t-op {
-            width: 30px;
-        }
+    .tr-deep-1 {
+        background-color: silver;
+        border-top: solid 2px black;
+    }
+    
+    .long-l {
+    	width: 700px;
+    	overflow: overlay;
+    }
+    
+    .long-m {
+    	width: 150px;
+    	overflow: overlay;
+    }
 
-        .t-1{
-            width: 80px;
-        }
-
-        .tr-deep-1 {
-            background-color: silver;
-            border-top: solid 2px black;
-        }
-        
-        .long-l {
-        	width: 700px;
-        	overflow: overlay;
-        }
-        
-        .long-m {
-        	width: 150px;
-        	overflow: overlay;
-        }
-
-        @media only screen and (min-width: 888px) {
-            .t-hide-on-narrow {
-                display: table-cell !important;
-            }
-        }
-
+    @media only screen and (min-width: 888px) {
         .t-hide-on-narrow {
-            display: none;
+            display: table-cell !important;
         }
-    </style>
-    <title>Title</title>
+    }
+
+    .t-hide-on-narrow {
+        display: none;
+    }
+</style>
+</@common_head>
 </head>
 <body id="demo" ng-app="demo" ng-controller="demo">
-
-<div style="text-align: center;">
-    <div class="C-tip half-circle" ng-click="changeTip()"></div>
-    <div class="C-cate" ng-hide="A_hide">
-        <a href="${serverPath}/log/visit">VISIT</a> | 
-        <a href="${serverPath}/log/info">INFO</a> | 
-        <a href="${serverPath}/log/warn">WARN</a> | 
-        <a href="${serverPath}/log/error">ERROR</a> | 
-        <a href="${serverPath}/log/inspector">BeanInspector</a>
-    </div>
-</div>
+<@common_body>
 <h1 style="text-align: center;">bean inspector</h1>
 <header>
 	<table class="table" style="text-align: center;">
@@ -135,7 +92,9 @@
 	    <tbody ng-repeat="node in nodes" ng-include="'treeView'"></tbody>
 	</table>
 </div>
+</@common_body>
 
+<@common_bottom>
 <script src="http://apps.bdimg.com/libs/angular.js/1.4.6/angular.min.js"></script>
 <script src="http://apps.bdimg.com/libs/angular.js/1.4.6/angular-animate.min.js"></script>
 <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -191,5 +150,6 @@
 	// 	angular.bootstrap(document.getElementById("demo"), [ 'demo' ]);
 	// });
 </script>
+</@common_bottom>
 </body>
 </html>

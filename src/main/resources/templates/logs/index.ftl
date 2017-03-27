@@ -1,51 +1,9 @@
+<#include "../common.ftl">
 <!DOCTYPE HTML>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
-<title>日志集中管理系统</title>
+<@common_head title="日志集中管理系统">
 <style type="text/css">
-
-    .half-circle {
-        width: 30px;
-        height: 30px;
-        /* 水平半径 = width/2, 垂直半径 = height + padding */
-        border-radius: 0 0 20px 20px/0 0 20px 20px;
-        background-color: #f29900;
-        color: #fff;
-        text-align: center;
-        font-size: 1.6rem;
-    }
-
-    .C-cate {
-        margin: 10px auto;
-        width: 90%;
-        transition: all linear 0.5s;
-        background-color: lightblue;
-        position: relative;
-        top: 0;
-        left: 0;
-    }
-
-    .C-tip {
-        position: absolute;
-        right: 10px;
-        top: -5px;
-    }
-
-    .C-cate.ng-hide {
-        background-color: greenyellow;
-        top:-200px;
-        left: 200px;
-    }
-</style>
-
-<style type="text/css">
-body {
-	text-align: center;
-	margin: 0 auto;
-}
-
 table {
 	font-family: verdana, arial, sans-serif;
 	font-size: 11px;
@@ -76,13 +34,7 @@ table tr .message {
 	color: red;
 }
 
-a {
-	color: black;
-}
-
 </style>
-<script type="text/javascript" 
-	src="${staticServerPath}/lib/jquery/jquery-1.11.1.js"></script>
 <script type="text/javascript">
 function displayStack(id) {
 	var stackId = "#table-"+id+"-stack";
@@ -95,11 +47,12 @@ function displayStack(id) {
 	
 }
 </script>
+</@common_head>
 </head>
 
 <body>
-<#include "../common.ftl">
-<h1>LOG</h1>
+<@common_body>
+<h1 style="text-align: center;">LOG</h1>
 <div>
 <table>
 <tr>
@@ -148,6 +101,9 @@ function displayStack(id) {
 </table>
 </#list>
 </div>
+</@common_body>
 
+<@common_bottom>
+</@common_bottom>
 </body>
 </html>

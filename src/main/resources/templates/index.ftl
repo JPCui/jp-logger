@@ -1,10 +1,15 @@
-<!DOCTYPE HTML>
-<html>
+<#include "./common.ftl">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<@common_head title="日志集中管理系统">
+    <link rel="stylesheet" href="${staticServerPath}/css/style.css">
+</@common_head>
+</head>
 
-<title>日志集中管理系统</title>
 <body>
+<@common_body>
+<div style="padding-left: 50px;">
 	<h1>Log</h1>
 
 	<div>
@@ -17,6 +22,10 @@
 		<a href="${serverPath}/log/error">ERROR</a> | ERROR
 		<hr />
 		<a href="${serverPath}/pages/inspector">BeanInspector</a> | 调用栈
+		<hr />
+		<a href="${serverPath}/mr">Analysis</a> | 分析
 	</div>
+</div>
+</@common_body>
 </body>
 </html>

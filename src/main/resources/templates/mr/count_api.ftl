@@ -29,9 +29,6 @@
   
 </head>
 <body id="body">
-<header>
-  <script src="${staticServerPath}/js/canvas-nest.js" count="200" zindex="-2" opacity="0.8" color="47,135,193" type="text/javascript"></script>
-</header>
 
 	
 <h1>API统计</h1>

@@ -1,1 +1,9 @@
-body{padding:50px;font:14px "Lucida Grande",Helvetica,Arial,sans-serif}a{color:#00B7FF}
+html, body {margin: 0; padding: 0px;}
+
+a {
+	color: -webkit-link;
+}
+
+a:visited {
+	color: -webkit-link;
+}
