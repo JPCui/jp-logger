@@ -69,14 +69,14 @@ public class MRController {
 		map.put("date", DateFormatUtils.format(day, "yyyy-MM-dd"));
 		map.put("datas", data);
 
-		Date day2 = DateUtils.addDays(day, 1);
+		Date day2 = DateUtils.addDays(day, -1);
 		cal.setTime(day2);
 		List<Object> data2 = dailyActiveService.mr(cal);
 		Map<String, Object> map2 = new HashMap<>();
 		map2.put("date", DateFormatUtils.format(day2, "yyyy-MM-dd"));
 		map2.put("datas", data2);
 
-		Date day3 = DateUtils.addDays(day2, 1);
+		Date day3 = DateUtils.addDays(day2, -1);
 		cal.setTime(day3);
 		List<Object> data3 = dailyActiveService.mr(cal);
 		Map<String, Object> map3 = new HashMap<>();
