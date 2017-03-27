@@ -16,9 +16,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jackson.version>1.9.12</jackson.version>
 		<spring-boot.version>1.3.6.RELEASE</spring-boot.version>
-        <jsoup.version>1.10.1</jsoup.version>
+		<jsoup.version>1.10.1</jsoup.version>
 	</properties>
 
+	<!-- 发布到本地目录 -->
 	<distributionManagement>
 		<repository>
 			<id>for-git</id>
@@ -36,17 +37,17 @@
 		<repository>
 			<id>jp-repo</id>
 			<name>jp-repo</name>
-			<url>https://raw.githubusercontent.com/jpcui/mvn-repo/master</url>
+			<url>https://raw.githubusercontent.com/jpcui/jp-base/master/repository</url>
 		</repository>
 
 	</repositories>
 
 	<dependencies>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>${jsoup.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>${jsoup.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>cn.cjp</groupId>
 			<artifactId>jp-base</artifactId>
@@ -206,10 +207,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
 				<version>2.4</version>
-				<configuration>
-					<localRepositoryPath>${project.basedir}/cn/cjp/jp-logger/${project.version}</localRepositoryPath>
-					<localRepositoryPath>${localRepositoryPath}</localRepositoryPath>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
