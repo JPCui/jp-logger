@@ -18,8 +18,10 @@ public class IPUtil {
 		conn.header("Content-Type", "application/json; charset=utf-8");
 		try {
 			String text = conn.get().text();
-			Map<String, Object> json = JacksonUtil.fromJsonToMap(text, String.class, Object.class);
-			return json.get("province").toString();
+			if (text != null && text.startsWith("{")) {
+				Map<String, Object> json = JacksonUtil.fromJsonToMap(text, String.class, Object.class);
+				return json.get("province").toString();
+			}
 		} catch (IOException e) {
 			LOGGER.warn(e.toString(), e);
 		}
