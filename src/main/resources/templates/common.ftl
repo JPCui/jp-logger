@@ -40,7 +40,7 @@
 
 <#macro common_body>
 <header>
-  <script src="${staticServerPath}/js/canvas-nest.js" count="200" zindex="-2" opacity="0.8" color="47,135,193" type="text/javascript"></script>
+<script src="${staticServerPath}/js/canvas-nest.js" count="200" zindex="-2" opacity="0.8" color="47,135,193" type="text/javascript"></script>
 </header>
 <div>
     <div class="C-cate" ng-hide="A_hide">
@@ -59,5 +59,6 @@
 
 <#macro common_bottom>
 <#nested>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 </#macro>
 
