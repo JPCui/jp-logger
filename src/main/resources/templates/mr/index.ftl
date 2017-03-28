@@ -28,7 +28,7 @@
 <script src="${staticServerPath}/js/mr/daily_active.js"></script>
 <script type="text/javascript">
 var ad = new AreaDistribution();
-ad.url = "${serverPath}/mr/count_ip.json";
+ad.url = "${serverPath}/mr/area_distribution.json";
 ad.render();
 
 var dailyActive = new DailyActive();
