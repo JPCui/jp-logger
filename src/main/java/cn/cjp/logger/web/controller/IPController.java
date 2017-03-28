@@ -20,4 +20,13 @@ public class IPController {
 		return mv;
 	}
 
+	@RequestMapping("/infos")
+	@ResponseBody
+	public Object infos(String[] ips) {
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("ret", 1);
+		mv.addObject("data", IPUtil.getCityByIps(ips));
+		return mv;
+	}
+
 }
