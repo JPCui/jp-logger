@@ -50,6 +50,20 @@ public class MRController {
 		return null;
 	}
 
+	@RequestMapping(value = "/area_distribution")
+	public ModelAndView areaDistribution(HttpServletResponse response) {
+		final String project = "count_ip";
+		if (Configuration.exists(project)) {
+			Map<String, Double> ipNumMap = simpleMapReduce.mr(project);
+
+			ModelAndView mv = new ModelAndView("/mr/area_distribution");
+			mv.addObject("datas", ipNumMap);
+			return mv;
+		}
+		response.setStatus(HttpStatus.NOT_FOUND.value());
+		return null;
+	}
+
 	@RequestMapping(value = "/daily_active")
 	public ModelAndView toDailyActive(Date day) {
 		ModelAndView mv = new ModelAndView("/mr/daily_active");
@@ -88,12 +102,6 @@ public class MRController {
 		rs.add(map2);
 		rs.add(map3);
 		return rs;
-	}
-
-	@RequestMapping(value = "/area_distribution")
-	public ModelAndView toAreaDistribution(Date day) {
-		ModelAndView mv = new ModelAndView("/mr/area_distribution");
-		return mv;
 	}
 
 }
