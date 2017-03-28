@@ -37,7 +37,7 @@ var AreaDistribution = function() {
 
 						var now = Date.now();
 						// 结束条件：并发完成 或 超时（5s）
-						while(concurrent.length < datas_length && Date.now()-now > 5000) {
+						while(concurrent.length < datas_length && Date.now()-now < 5000) {
 							for(var tt=0; tt<100000; tt++);
 						}
 
