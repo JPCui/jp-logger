@@ -28,3 +28,29 @@ IPUtil.getCityByIp = function (ip) {
 
     return r;
 }
+
+/**
+ * 异步请求IP info
+ * @param ip
+ * @returns {___anonymous1023_1023}
+ */
+IPUtil.getCityByIpAsync = function (ip, callback) {
+    var api = Config.contextPath + "/ip/info.json?ip=";
+    $.ajax({
+        url: api + ip,
+        async: true,
+        dataType: "json",
+        success: function (data) {
+            if (data.ret == 1) {
+                var r = new Object();
+                r.province = data.province;
+                callback(r);
+            }
+        },
+        error: function (a, b, c) {
+            console.log(a);
+            console.log(b);
+            console.log(c);
+        }
+    });
+}
