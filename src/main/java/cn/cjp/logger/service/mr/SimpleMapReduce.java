@@ -2,6 +2,7 @@ package cn.cjp.logger.service.mr;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -16,7 +17,9 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
 import cn.cjp.logger.mongo.MongoDao;
+import cn.cjp.logger.util.IPUtil;
 import cn.cjp.utils.Logger;
+import cn.cjp.utils.StringUtil;
 import cn.cjp.utils.ValueComparator;
 
 /**
@@ -53,17 +56,36 @@ public class SimpleMapReduce {
 		// see: OutputType
 		// iterable.action(MapReduceAction.MERGE);
 
-		Map<String, Double> tempResult = new HashMap<>();
-		ValueComparator<String, Double> comparator = new ValueComparator<>(tempResult);
-		SortedMap<String, Double> result = new TreeMap<>(comparator);
 		// 获取结果
+		Map<String, Double> ipNumResult = new HashMap<>();
 		MongoCursor<Document> cursor = iterable.iterator();
 		while (cursor.hasNext()) {
 			Document doc = cursor.next();
 			LOGGER.debug(doc);
 			String key = doc.get("_id").toString();
 			Double value = doc.getDouble("value");
-			tempResult.put(key, value);
+			ipNumResult.put(key, value);
+		}
+
+		Map<String, Double> tempResult = new HashMap<>();
+		ValueComparator<String, Double> comparator = new ValueComparator<>(tempResult);
+		SortedMap<String, Double> result = new TreeMap<>(comparator);
+		//
+		String[] ips = ipNumResult.keySet().toArray(new String[0]);
+		Map<String, String> ipInfo = IPUtil.getCityByIps(ips);
+		Iterator<String> it = ipNumResult.keySet().iterator();
+		while (it.hasNext()) {
+			String ip = it.next();
+			String province = ipInfo.get(ip);
+			if (StringUtil.isEmpty(province)) {
+				continue;
+			}
+			// replace key
+			if (tempResult.containsKey(province)) {
+				tempResult.put(province, tempResult.get(province) + ipNumResult.get(ip));
+			} else {
+				tempResult.put(province, ipNumResult.get(ip));
+			}
 		}
 		result.putAll(tempResult);
 		return result;
@@ -73,7 +95,7 @@ public class SimpleMapReduce {
 		SimpleMapReduce mr = new SimpleMapReduce();
 		mr.mongoDao = MongoDao.newInstance();
 
-		String project = "count_api";
+		String project = "count_ip";
 		// String project = "not_exist_project"; // 不存在的 project
 		System.out.println(mr.mr(Configuration.getMap(project), Configuration.getReduce(project)));
 	}
