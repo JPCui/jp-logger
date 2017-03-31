@@ -56,7 +56,7 @@
         </descriptorRefs>
         <archive>
             <manifest>
-                <mainClass>com.chenzhou.examples.Main</mainClass>
+                <mainClass>xxx.Main</mainClass>
             </manifest>
         </archive>
     </configuration>
@@ -75,6 +75,67 @@
 - run the following command:
 ```
 mvn clean assembly:assembly -Dmaven.test.skip=true
+```
+
+# pom 备份
+
+```
+<!-- 打包的时候，将依赖也打包 -->
+<plugin>
+	<artifactId>maven-assembly-plugin</artifactId>
+	<configuration>
+		<appendAssemblyId>false</appendAssemblyId>
+		<descriptorRefs>
+			<descriptorRef>jar-with-dependencies</descriptorRef>
+		</descriptorRefs>
+		<archive>
+			<manifest>
+				<mainClass>cn.cjp.logger.Application</mainClass>
+			</manifest>
+		</archive>
+	</configuration>
+	<executions>
+		<execution>
+			<id>make-assembly</id>
+			<phase>package</phase>
+			<goals>
+				<goal>assembly</goal>
+			</goals>
+		</execution>
+	</executions>
+</plugin>
+
+<plugin>
+	<groupId>org.apache.tomcat.maven</groupId>
+	<artifactId>tomcat7-maven-plugin</artifactId>
+	<version>2.2</version>
+	<configuration>
+		<uriEncoding>${project.build.sourceEncoding}</uriEncoding>
+		<update>true</update>
+		<url>${deploy.url}</url>
+		<server>${deploy.server}</server>
+		<ignorePackaging>true</ignorePackaging>
+	</configuration>
+	<executions>
+		<execution>
+			<id>tomcat-run</id>
+			<goals>
+				<goal>exec-war-only</goal>
+			</goals>
+			<phase>package</phase>
+			<configuration>
+				<path>jp-logger</path>
+				<!-- optional only if you want to use a preconfigured server.xml file -->
+				<!-- 目前修改端口，只有在server.xml里配置 -->
+				<serverXml>src/main/resources/tomcat/server.xml</serverXml>
+				<!-- optional values which can be configurable -->
+				<!-- default value is exec-war but you can customize -->
+				<attachArtifactClassifier>exe</attachArtifactClassifier>
+				<attachArtifactClassifierType>jar</attachArtifactClassifierType>
+			</configuration>
+		</execution>
+	</executions>
+</plugin>
 ```
 
 # referrence

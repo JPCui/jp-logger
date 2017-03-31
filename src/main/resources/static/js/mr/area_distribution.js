@@ -28,7 +28,7 @@ var AreaDistribution = function() {
 
 				var option = {
 					title : {
-						text : '访问量',
+						text : '访问地域分布图',
 						subtext : '基于访问日志',
 						x : 'center'
 					},

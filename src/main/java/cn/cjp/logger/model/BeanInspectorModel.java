@@ -70,6 +70,23 @@ public class BeanInspectorModel extends BaseModel implements AbstractModel {
 
 	private String remarks;
 
+	public static BeanInspectorModel newInstance(String className, String method, String remarks) {
+		BeanInspectorModel inspectorModel = new BeanInspectorModel();
+		inspectorModel.setCalledTimes(0);
+		inspectorModel.setClazz(className);
+		inspectorModel.setMethod(method);
+		inspectorModel.setRemarks(remarks);
+		return inspectorModel;
+	}
+
+	/**
+	 * 
+	 * @return class.method(..)
+	 */
+	public String toFullName() {
+		return this.getClazz() + "." + this.getMethod();
+	}
+
 	@Override
 	public DBObject toDBObject() {
 		BasicDBObject basicDBObject = new BasicDBObject();

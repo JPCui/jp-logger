@@ -7,6 +7,7 @@ rem  */
 title %cd%
 echo.
 echo [信息] 运行  - run
+echo 注意：需要按照 how_to_build_an_executable_war.md 配置
 echo.
 
 rem pause

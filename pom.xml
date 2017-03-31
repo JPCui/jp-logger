@@ -4,13 +4,14 @@
 
 	<groupId>cn.cjp</groupId>
 	<artifactId>jp-logger</artifactId>
-	<version>1.1.0.Release</version>
+	<version>1.2.0.Snapshot</version>
 	<packaging>war</packaging>
 
 	<name>jp-logger</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
+		<jp-base.version>v1.0.0</jp-base.version>
 		<junit.version>4.11</junit.version>
 		<spring.version>4.3.7.RELEASE</spring.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,9 +41,16 @@
 			<url>https://raw.githubusercontent.com/jpcui/jp-base/master/repository</url>
 		</repository>
 
+		<repository>
+			<id>jp-logger</id>
+			<name>jp-base</name>
+			<url>https://raw.githubusercontent.com/jpcui/jp-logger/master/repository</url>
+		</repository>
+
 	</repositories>
 
 	<dependencies>
+
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
@@ -51,7 +59,7 @@
 		<dependency>
 			<groupId>cn.cjp</groupId>
 			<artifactId>jp-base</artifactId>
-			<version>v2017.0228</version>
+			<version>${jp-base.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
@@ -168,6 +176,16 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>1.8.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.8.5</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>
@@ -203,11 +221,7 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>2.4</version>
-			</plugin>
+			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -218,30 +232,7 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
-			<!-- 打包的时候，将依赖也打包 -->
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<appendAssemblyId>false</appendAssemblyId>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>cn.cjp.logger.Application</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly</id>
-						<phase>package</phase>
-						<goals>
-							<goal>assembly</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -249,40 +240,10 @@
 				<configuration>
 					<!-- maven打包的时候告诉maven不需要web.xml,否刚会报找不到web.xml错误 -->
 					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<attachClasses>true</attachClasses>
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<uriEncoding>${project.build.sourceEncoding}</uriEncoding>
-					<update>true</update>
-					<url>${deploy.url}</url>
-					<server>${deploy.server}</server>
-					<ignorePackaging>true</ignorePackaging>
-				</configuration>
-				<executions>
-					<execution>
-						<id>tomcat-run</id>
-						<goals>
-							<goal>exec-war-only</goal>
-						</goals>
-						<phase>package</phase>
-						<configuration>
-							<path>jp-logger</path>
-							<!-- optional only if you want to use a preconfigured server.xml file -->
-							<!-- 目前修改端口，只有在server.xml里配置 -->
-							<serverXml>src/main/resources/tomcat/server.xml</serverXml>
-							<!-- optional values which can be configurable -->
-							<!-- default value is exec-war but you can customize -->
-							<attachArtifactClassifier>exe</attachArtifactClassifier>
-							<attachArtifactClassifierType>jar</attachArtifactClassifierType>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 </project>

@@ -39,7 +39,7 @@ public class MongoTest {
 
 	@Test
 	public void t2() throws IOException {
-		MongoDao mongoDao = new MongoDao();
+		MongoDao mongoDao = MongoDao.newInstance();
 		mongoDao.getDB().getCollection("info").insertOne(new Log().toDoc());
 		System.out.println(mongoDao.getDB().getCollection("log_visit").count());
 		mongoDao.close();
