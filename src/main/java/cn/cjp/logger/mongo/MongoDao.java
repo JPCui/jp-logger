@@ -57,7 +57,7 @@ public class MongoDao implements InitializingBean, Closeable {
 	 * 
 	 * @throws IOException
 	 */
-	private MongoDao() throws IOException {
+	public MongoDao() throws IOException {
 		initProperties();
 		client = createMongoClient();
 	}
