@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.freemarker.FreeMarkerProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.oxm.xstream.XStreamMarshaller;
@@ -51,6 +52,7 @@ import cn.cjp.web.Symphony;
  */
 @Configuration
 @EnableWebMvc
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class MVCConfig extends WebMvcConfigurationSupport {
 
 	private static final Logger logger = Logger.getLogger(MVCConfig.class);
