@@ -17,7 +17,6 @@ import cn.cjp.logger.model.Log;
 import cn.cjp.logger.mongo.MongoDao;
 import cn.cjp.logger.redis.RedisDao;
 import cn.cjp.logger.util.JacksonUtil;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 @Component
 @PropertySource(value = "classpath:/config.properties")
@@ -45,33 +44,26 @@ public class LogConsumer extends AbstractConsumer {
 	@Autowired
 	MongoDao mongoDao;
 
-	public void run() {
-		logger.info("log consumer ready");
-		while (!shutdown) {
-			try {
-				// 阻塞队列操作
-				String value = pop();
-				if (value != null) {
-					Log log = JacksonUtil.fromJsonToObj(value, Log.class);
-					Document dbo = log.toDoc();
-					MongoDatabase db = mongoDao.getDB();
-					final String collectionName = collectionPrefix + log.getName().toLowerCase();
-					MongoCollection<Document> dbc = db.getCollection(collectionName);
-					dbc.insertOne(dbo);
-					String _id = dbo.get("_id").toString();
-					if (logger.isDebugEnabled()) {
-						logger.info(
-								String.format("[%s]insert new log %s, msg: %s", collectionName, _id, log.getMessage()));
-					}
-				} else {
-					logger.error("cache read list error, the err value is " + value);
+	public void execute() throws UnexpectedException {
+		try {
+			// 阻塞队列操作
+			String value = pop();
+			if (value != null) {
+				Log log = JacksonUtil.fromJsonToObj(value, Log.class);
+				Document dbo = log.toDoc();
+				MongoDatabase db = mongoDao.getDB();
+				final String collectionName = collectionPrefix + log.getName().toLowerCase();
+				MongoCollection<Document> dbc = db.getCollection(collectionName);
+				dbc.insertOne(dbo);
+				String _id = dbo.get("_id").toString();
+				if (logger.isDebugEnabled()) {
+					logger.info(String.format("[%s]insert new log %s, msg: %s", collectionName, _id, log.getMessage()));
 				}
-			} catch (JedisConnectionException e) {
-				logger.error("", e);
-				break;
-			} catch (Exception e) {
-				logger.error("", e);
+			} else {
+				logger.error("cache read list error, the err value is " + value);
 			}
+		} catch (Exception e) {
+			throw new UnexpectedException(e);
 		}
 	}
 
