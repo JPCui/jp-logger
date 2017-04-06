@@ -21,7 +21,7 @@ import com.mongodb.client.model.FindOneAndUpdateOptions;
 
 import cn.cjp.logger.model.Node;
 import cn.cjp.logger.mongo.MongoDao;
-import cn.cjp.logger.util.Page;
+import cn.cjp.utils.Page;
 
 @Configuration
 @PropertySource(value = "classpath:/config.properties")

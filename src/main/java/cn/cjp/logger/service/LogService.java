@@ -29,7 +29,7 @@ import com.mongodb.client.MongoDatabase;
 
 import cn.cjp.logger.model.Log;
 import cn.cjp.logger.mongo.MongoDao;
-import cn.cjp.logger.util.Page;
+import cn.cjp.utils.Page;
 
 /**
  * 日志
@@ -103,9 +103,7 @@ public class LogService {
 			filter.put("message", new BasicDBObject("$regex", keyword));
 		}
 
-		List<Object> logs = new ArrayList<>();
 		MongoDatabase db = mongoDao.getDB();
-
 		MongoCollection<Document> dbc = db.getCollection(level);
 		MongoCursor<Document> cursor = null;
 		if (filter.isEmpty()) {
@@ -116,6 +114,7 @@ public class LogService {
 					.limit(default_page_size).iterator();
 		}
 
+		List<Object> logs = new ArrayList<>();
 		while (cursor.hasNext()) {
 			Document dbo = cursor.next();
 			Log log = Log.fromDoc(dbo);
@@ -180,15 +179,13 @@ public class LogService {
 	}
 
 	public Page findAllToMap(String level, int pageNum) {
-
-		List<Object> logs = new ArrayList<>();
 		MongoDatabase db = mongoDao.getDB();
-
 		MongoCollection<Document> dbc = db.getCollection(collection(level));
 		FindIterable<Document> it = dbc.find().skip((pageNum - 1) * default_page_size)
 				.sort(new BasicDBObject("time", -1)).limit(default_page_size);
 		MongoCursor<Document> cursor = it.iterator();
 
+		List<Object> logs = new ArrayList<>();
 		while (cursor.hasNext()) {
 			Document dbo = cursor.next();
 			logs.add(dbo);
@@ -204,13 +201,12 @@ public class LogService {
 		BasicDBObject filter = new BasicDBObject();
 		filter.put("time", new BasicDBObject(QueryOperators.LTE, date));
 
-		List<Object> logs = new ArrayList<>();
 		MongoDatabase db = mongoDao.getDB();
-
 		MongoCollection<Document> dbc = db.getCollection(collection(level));
 		MongoCursor<Document> cursor = dbc.find(filter).skip((pageNum - 1) * default_page_size)
 				.sort(new BasicDBObject("time", -1)).limit(default_page_size).iterator();
 
+		List<Object> logs = new ArrayList<>();
 		while (cursor.hasNext()) {
 			Document dbo = cursor.next();
 			logs.add(dbo);

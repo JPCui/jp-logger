@@ -44,6 +44,9 @@ public class BeanInspector implements MethodInterceptor, Closeable {
 
 	public static ThreadLocal<Node> safeNode = new ThreadLocal<>();
 
+	/**
+	 * 临时用作开关
+	 */
 	static boolean enable = true;
 
 	@Autowired
