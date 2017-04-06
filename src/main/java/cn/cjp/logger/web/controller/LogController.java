@@ -15,7 +15,7 @@ import cn.cjp.logger.model.BeanInspectorModel;
 import cn.cjp.logger.model.Log;
 import cn.cjp.logger.service.LogService;
 import cn.cjp.logger.service.NodeService;
-import cn.cjp.logger.util.Page;
+import cn.cjp.utils.Page;
 
 @RestController(value = "logController")
 @RequestMapping("/log")
