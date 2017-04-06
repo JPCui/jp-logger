@@ -15,13 +15,16 @@ import org.springframework.context.annotation.Configuration;
 
 import cn.cjp.logger.model.BeanInspectorModel;
 import cn.cjp.logger.model.Node;
+import cn.cjp.logger.service.BeanInspector;
 import cn.cjp.utils.Logger;
 import cn.cjp.utils.Stopwatchs;
 import cn.cjp.utils.Stopwatchs.Stopwatch;
 import cn.cjp.utils.Stopwatchs.Task;
 
 /**
- * 请求日志过滤器
+ * filter for Stopwatch. <br>
+ * 
+ * just use for replace {@link BeanInspector}
  * 
  * @usage spring-boot {@link Configuration} or @WebFilter
  * 
@@ -49,11 +52,12 @@ public class StopwatchFilter implements Filter {
 			LOGGER.error(e, e);
 		} finally {
 			Stopwatch root = Stopwatchs.getRoot();
-			Stopwatchs.release();
-			LOGGER.info(root.toFullString());
+			if (root != null) {
+				LOGGER.info("\r\n" + Stopwatchs.getTimingStat());
 
-			LOGGER.info(toNode(root));
-
+				LOGGER.info(toNode(root));
+				Stopwatchs.release();
+			}
 		}
 	}
 
